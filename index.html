@@ -1,0 +1,2909 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DataSphere — Database Academy</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f1f2f6;--panel:#fff;--purple:#4b2a7b;--purple2:#6b3fa0;
+  --purple-soft:#efe9f8;--orange:#ff7a45;--orange-soft:#fff1ea;
+  --cyan:#1fb6cc;--cyan-soft:#e6f8fb;
+  --text:#1e2233;--muted:#6d7488;--border:#e4e6ee;
+  --ok:#1f9d55;--ok-soft:#e7f6ed;--bad:#d94a4a;--bad-soft:#fdeaea;
+  --radius:14px;--shadow:0 2px 12px rgba(28,24,60,.07);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.62}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+a{color:var(--purple2);text-decoration:none}
+
+/* LAYOUT */
+.app{display:flex;min-height:100vh}
+.sidebar{width:252px;background:#fff;border-right:1px solid var(--border);position:fixed;top:0;bottom:0;left:0;overflow-y:auto;padding:18px 14px 40px;z-index:60;transition:transform .25s ease}
+.brand{display:flex;align-items:center;gap:10px;padding:6px 8px 16px;border-bottom:1px solid var(--border);margin-bottom:12px}
+.brand-logo{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--purple),var(--purple2));display:grid;place-items:center;color:#fff;font-weight:800;font-size:17px;letter-spacing:-.5px}
+.brand-name{font-weight:800;font-size:16px;letter-spacing:-.2px;line-height:1.15}
+.brand-sub{font-size:11px;color:var(--muted);letter-spacing:.4px;text-transform:uppercase}
+.nav-group-title{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);padding:12px 10px 6px;font-weight:700}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:10px;cursor:pointer;color:#3a3f52;font-size:14.5px;border:1px solid transparent;transition:.15s;user-select:none}
+.nav-item:hover{background:#f5f4fa}
+.nav-item.active{background:var(--purple-soft);color:var(--purple);font-weight:600;border-color:#ded2f2}
+.nav-item .ico{width:20px;text-align:center;font-size:15px;opacity:.85}
+.nav-item .badge{margin-left:auto;font-size:11px;background:var(--purple);color:#fff;border-radius:20px;padding:1px 7px;font-weight:700}
+.nav-item .badge.done{background:var(--ok)}
+.sidebar-foot{margin-top:18px;padding:12px;background:#faf9fd;border:1px dashed #ddd6ee;border-radius:12px;font-size:12px;color:var(--muted);line-height:1.5}
+
+.main{margin-left:252px;flex:1;min-width:0}
+.topbar{position:sticky;top:0;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:11px 24px;display:flex;gap:14px;align-items:center;z-index:40}
+.hamburger{display:none;background:#fff;border:1px solid var(--border);border-radius:10px;width:38px;height:38px;cursor:pointer;font-size:17px}
+.searchbar{flex:1;max-width:520px;display:flex;align-items:center;gap:8px;background:#f5f5f9;border:1px solid var(--border);border-radius:10px;padding:7px 12px}
+.searchbar input{border:0;background:transparent;outline:0;width:100%;font-size:14px}
+.search-results{position:absolute;top:56px;left:24px;right:24px;max-width:520px;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;z-index:45}
+.search-results div{padding:9px 14px;cursor:pointer;font-size:14px;border-bottom:1px solid #f2f2f7}
+.search-results div:hover{background:var(--purple-soft)}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)}
+.pill{background:var(--cyan-soft);color:#0e7d8c;padding:4px 11px;border-radius:20px;font-weight:700;font-size:12.5px}
+.pill.purple{background:var(--purple-soft);color:var(--purple)}
+
+.content{padding:24px;max-width:1180px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:18px}
+.card.tight{padding:16px}
+
+/* TYPOGRAPHY */
+h1{font-size:27px;letter-spacing:-.5px;line-height:1.25;font-weight:800}
+h2{font-size:21px;letter-spacing:-.3px;margin-bottom:12px;font-weight:800}
+h3{font-size:17.5px;margin-bottom:10px;font-weight:700}
+h4{font-size:15.5px;margin:16px 0 7px;color:var(--purple);font-weight:700}
+p{margin-bottom:10px}
+ul,ol{margin:0 0 12px 22px}
+li{margin-bottom:5px}
+code{background:#f2f1f8;padding:2px 6px;border-radius:6px;font-family:'Consolas',monospace;font-size:13.5px;color:#5b3a99}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+
+/* BUTTONS */
+.btn{border:1px solid var(--border);background:#fff;border-radius:10px;padding:9px 16px;cursor:pointer;font-weight:600;font-size:14px;transition:.15s;display:inline-flex;align-items:center;gap:7px;justify-content:center}
+.btn:hover{background:#f6f5fb;border-color:#d6cfec}
+.btn.primary{background:var(--purple);border-color:var(--purple);color:#fff}
+.btn.primary:hover{background:var(--purple2)}
+.btn.orange{background:var(--orange);border-color:var(--orange);color:#fff}
+.btn.orange:hover{filter:brightness(.94)}
+.btn.cyan{background:var(--cyan);border-color:var(--cyan);color:#fff}
+.btn.ghost{background:transparent}
+.btn.small{padding:6px 11px;font-size:13px;border-radius:8px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+
+/* HOME */
+.hero{background:linear-gradient(135deg,#43226f 0%,#5b2f96 55%,#6c3fae 100%);color:#fff;border-radius:18px;padding:38px 34px;position:relative;overflow:hidden;margin-bottom:20px}
+.hero:after{content:"";position:absolute;right:-70px;top:-70px;width:280px;height:280px;border-radius:50%;background:rgba(31,182,204,.22)}
+.hero:before{content:"";position:absolute;right:90px;bottom:-90px;width:190px;height:190px;border-radius:50%;background:rgba(255,122,69,.20)}
+.hero h1{font-size:33px;margin-bottom:10px;position:relative;z-index:2}
+.hero p{max-width:640px;color:#e5dcf5;position:relative;z-index:2;margin-bottom:20px}
+.hero .btn-row{position:relative;z-index:2}
+.hero .btn.orange{box-shadow:0 6px 18px rgba(255,122,69,.35)}
+.hero .btn.ghost{color:#fff;border-color:rgba(255,255,255,.4)}
+.hero .btn.ghost:hover{background:rgba(255,255,255,.12)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:13px;margin-bottom:18px}
+.stat{background:#fff;border:1px solid var(--border);border-radius:13px;padding:15px 16px;box-shadow:var(--shadow)}
+.stat .label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:700}
+.stat .value{font-size:25px;font-weight:800;color:var(--purple);line-height:1.2;margin-top:3px}
+.stat .sub{font-size:12px;color:var(--muted)}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.feature{background:#fff;border:1px solid var(--border);border-radius:13px;padding:17px;cursor:pointer;transition:.16s;box-shadow:var(--shadow)}
+.feature:hover{transform:translateY(-2px);border-color:#cfc3ec;box-shadow:0 8px 20px rgba(75,42,123,.10)}
+.feature .fi{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font-size:18px;margin-bottom:10px;background:var(--purple-soft);color:var(--purple)}
+.feature .ft{font-weight:700;margin-bottom:4px}
+.feature .fd{font-size:13px;color:var(--muted)}
+
+/* TABLES */
+.tablewrap{overflow-x:auto;border:1px solid var(--border);border-radius:12px;background:#fff}
+table.dtable{width:100%;border-collapse:collapse;font-size:14px;min-width:460px}
+table.dtable th{background:#f7f6fc;text-align:left;padding:10px 13px;font-weight:700;font-size:13px;color:#4a4f63;border-bottom:1px solid var(--border);white-space:nowrap;letter-spacing:.2px}
+table.dtable td{padding:9px 13px;border-bottom:1px solid #f0f1f6}
+table.dtable tbody tr:last-child td{border-bottom:0}
+table.dtable tbody tr:hover{background:#faf9fe}
+table.dtable tbody tr.selected{background:var(--purple-soft);box-shadow:inset 3px 0 0 var(--purple)}
+table.dtable tbody tr.clickable{cursor:pointer}
+table.dtable tbody tr.hit{background:var(--cyan-soft)}
+th.sortable{cursor:pointer;user-select:none}
+th.sortable:hover{background:#efeaf9;color:var(--purple)}
+th .arrow{color:var(--purple);font-weight:800}
+
+/* TASKS */
+.task{background:#fbfaff;border:1px solid #e6e1f4;border-radius:14px;padding:18px;margin:16px 0}
+.task-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.task-num{background:var(--orange);color:#fff;font-size:12px;font-weight:800;border-radius:7px;padding:3px 9px;letter-spacing:.3px}
+.task-title{font-weight:700;font-size:15.5px}
+.task-prompt{font-size:14px;color:#454b60;margin-bottom:12px}
+.opts-list{display:flex;flex-direction:column;gap:8px;margin:10px 0}
+.opt-check{display:flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:9px 12px;cursor:pointer;font-size:14px;transition:.14s}
+.opt-check:hover{border-color:#cfc3ec}
+.opt-check.on{background:var(--purple-soft);border-color:#c9b8ea}
+.opt-check input{accent-color:var(--purple);width:16px;height:16px}
+.ctrl-row{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.ctrl{display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:6px 11px;font-size:13.5px}
+.ctrl span{color:var(--muted);font-weight:600}
+.ctrl select,.ctrl input{border:1px solid var(--border);border-radius:7px;padding:4px 8px;outline:0;background:#fff}
+.input{border:1px solid var(--border);border-radius:10px;padding:9px 12px;outline:0;background:#fff;width:100%;max-width:340px}
+.input:focus{border-color:var(--purple2);box-shadow:0 0 0 3px rgba(107,63,160,.10)}
+.feedback{margin-top:12px;padding:12px 14px;border-radius:11px;font-size:14px;display:none}
+.feedback.show{display:block}
+.feedback.ok{background:var(--ok-soft);color:#166b3a;border:1px solid #bfe6cf}
+.feedback.bad{background:var(--bad-soft);color:#982c2c;border:1px solid #f3c9c9}
+.feedback.info{background:var(--cyan-soft);color:#0e6f7d;border:1px solid #bde9ef}
+
+/* CALLOUT */
+.callout{border-left:4px solid var(--cyan);background:var(--cyan-soft);padding:13px 16px;border-radius:0 11px 11px 0;margin:14px 0;font-size:14.2px}
+.callout.purple{border-color:var(--purple);background:var(--purple-soft)}
+.callout.orange{border-color:var(--orange);background:var(--orange-soft)}
+.callout b{color:#0e5f6b}
+.callout.purple b{color:var(--purple)}
+.callout.orange b{color:#b34a1e}
+.steps{counter-reset:s;list-style:none;margin-left:0}
+.steps li{counter-increment:s;position:relative;padding-left:38px;margin-bottom:11px}
+.steps li:before{content:counter(s);position:absolute;left:0;top:1px;width:25px;height:25px;border-radius:8px;background:var(--purple);color:#fff;display:grid;place-items:center;font-size:12.5px;font-weight:800}
+
+/* QUIZ */
+.quiz{margin-top:6px}
+.q{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:11px}
+.q-head{display:flex;gap:10px;font-weight:600;font-size:14.6px;margin-bottom:10px;align-items:flex-start}
+.q-num{background:var(--purple);color:#fff;min-width:24px;height:24px;border-radius:7px;display:grid;place-items:center;font-size:12.5px;font-weight:800;flex:none;margin-top:1px}
+.q-opts{display:grid;gap:7px}
+.opt{display:flex;gap:9px;align-items:flex-start;padding:8px 12px;border:1px solid var(--border);border-radius:9px;cursor:pointer;font-size:14px;transition:.13s}
+.opt:hover{background:#faf9fe;border-color:#d8cff0}
+.opt input{margin-top:4px;accent-color:var(--purple)}
+.opt.correct{background:var(--ok-soft);border-color:#a9dcbf}
+.opt.wrong{background:var(--bad-soft);border-color:#f0bcbc}
+.quiz-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.quiz-result{margin-top:14px}
+.result-box{background:#fff;border:1px solid var(--border);border-radius:13px;padding:18px}
+.result-score{font-size:34px;font-weight:800;color:var(--purple);line-height:1.1}
+.result-verdict{font-size:16px;font-weight:700;margin:6px 0 10px}
+.mini-stats{display:flex;gap:18px;flex-wrap:wrap;font-size:14px;margin-bottom:12px}
+.mini-stats span b{color:var(--purple)}
+.review{margin-top:12px}
+.review-item{border-left:3px solid var(--bad);background:#fffafa;padding:10px 14px;border-radius:0 10px 10px 0;margin-bottom:9px;font-size:13.8px}
+.review-item .ans{color:var(--ok);font-weight:600}
+.review-item .mine{color:var(--bad);font-weight:600}
+.progressbar{height:9px;background:#eceaf4;border-radius:20px;overflow:hidden;margin:6px 0 2px}
+.progressbar > i{display:block;height:100%;background:linear-gradient(90deg,var(--purple),var(--cyan));border-radius:20px;transition:width .4s}
+
+/* TOPIC LIST */
+.topic-row{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--border);border-radius:13px;padding:14px 17px;margin-bottom:11px;cursor:pointer;transition:.15s;box-shadow:var(--shadow)}
+.topic-row:hover{border-color:#cfc3ec;transform:translateX(3px)}
+.topic-num{background:var(--purple-soft);color:var(--purple);font-weight:800;border-radius:10px;padding:8px 12px;font-size:14px;flex:none}
+.topic-info{flex:1;min-width:0}
+.topic-info .tt{font-weight:700;font-size:15.2px}
+.topic-info .td{font-size:13px;color:var(--muted)}
+.status-dot{width:11px;height:11px;border-radius:50%;background:#d8dae4;flex:none}
+.status-dot.done{background:var(--ok)}
+
+/* LAB */
+.lab-filters{display:flex;flex-direction:column;gap:9px;margin:12px 0}
+.cond{display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:#fff;border:1px solid var(--border);border-radius:11px;padding:8px 11px}
+.cond select,.cond input{border:1px solid var(--border);border-radius:8px;padding:6px 9px;outline:0;background:#fff}
+.cond .rm{background:#fdeaea;border:1px solid #f3c9c9;color:#b63636;border-radius:8px;width:28px;height:28px;cursor:pointer;font-weight:700}
+.logic-toggle{display:inline-flex;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#fff}
+.logic-toggle button{border:0;background:#fff;padding:7px 16px;cursor:pointer;font-weight:700;font-size:13px;color:var(--muted)}
+.logic-toggle button.on{background:var(--purple);color:#fff}
+.lab-meta{display:flex;gap:14px;flex-wrap:wrap;align-items:center;font-size:13.5px;color:var(--muted);margin:10px 0}
+.lab-meta b{color:var(--purple);font-size:15px}
+
+/* PROJECT */
+.field-chip{display:inline-flex;align-items:center;gap:7px;background:var(--purple-soft);color:var(--purple);border:1px solid #d8cdf0;border-radius:20px;padding:5px 12px;font-size:13.5px;font-weight:600;margin:0 7px 7px 0}
+.field-chip .x{cursor:pointer;font-weight:800;color:#8b6bbd}
+.pick-chip{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px dashed #cfc7e6;border-radius:20px;padding:5px 12px;font-size:13.5px;margin:0 7px 7px 0;cursor:pointer}
+.pick-chip:hover{background:var(--purple-soft)}
+.crit{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px dashed #ececf4;font-size:14px}
+.crit:last-child{border-bottom:0}
+.crit .v{font-weight:800;color:var(--purple)}
+.score-big{font-size:40px;font-weight:800;color:var(--purple);line-height:1}
+textarea.input{max-width:100%;min-height:88px;resize:vertical}
+
+/* MISC */
+.divider{height:1px;background:var(--border);margin:18px 0}
+.tagline{display:inline-block;background:var(--orange-soft);color:#b34a1e;font-size:12.5px;font-weight:700;padding:3px 11px;border-radius:20px;margin-bottom:10px;letter-spacing:.3px}
+.overlay{display:none;position:fixed;inset:0;background:rgba(25,20,45,.42);z-index:55}
+.overlay.show{display:block}
+
+@media(max-width:980px){
+  .sidebar{transform:translateX(-105%);box-shadow:0 10px 40px rgba(0,0,0,.18)}
+  .sidebar.open{transform:none}
+  .main{margin-left:0}
+  .hamburger{display:inline-flex;align-items:center;justify-content:center}
+  .content{padding:16px}
+  .hero{padding:26px 20px}
+  .hero h1{font-size:25px}
+  .topbar{padding:10px 14px}
+  .search-results{left:14px;right:14px}
+}
+@media(max-width:560px){
+  h1{font-size:22px}
+  .card{padding:15px}
+  .stat .value{font-size:21px}
+  .topic-row{flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+
+<div class="overlay" id="overlay"></div>
+
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-logo">DS</div>
+      <div>
+        <div class="brand-name">DataSphere</div>
+        <div class="brand-sub">Database Academy</div>
+      </div>
+    </div>
+
+    <div class="nav-group-title">Негізгі</div>
+    <div class="nav-item" data-nav="home"><span class="ico">🏠</span> Басты бет</div>
+    <div class="nav-item" data-nav="topics"><span class="ico">📚</span> Оқу тақырыптары</div>
+
+    <div class="nav-group-title">Практика</div>
+    <div class="nav-item" data-nav="lab"><span class="ico">🧪</span> Data Lab</div>
+    <div class="nav-item" data-nav="practice"><span class="ico">✍️</span> Практикалық тапсырмалар</div>
+    <div class="nav-item" data-nav="project"><span class="ico">🛠️</span> Мини-жоба</div>
+
+    <div class="nav-group-title">Бағалау</div>
+    <div class="nav-item" data-nav="tests"><span class="ico">📝</span> Тақырыптық тесттер</div>
+    <div class="nav-item" data-nav="final"><span class="ico">🎯</span> Қорытынды тест</div>
+    <div class="nav-item" data-nav="results"><span class="ico">📊</span> Менің нәтижелерім</div>
+
+    <div class="sidebar-foot">
+      III бөлім · Деректер базасы<br>
+      9-сынып информатика<br>
+      <span style="color:#9a9fb5">Прогресс осы браузерде сақталады.</span>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="hamburger" id="hamburger">☰</button>
+      <div class="searchbar">
+        <span>🔍</span>
+        <input type="text" id="globalSearch" placeholder="Тақырып, термин немесе тапсырма іздеу...">
+      </div>
+      <div class="topbar-right">
+        <span class="pill purple" id="topProgress">0%</span>
+      </div>
+    </header>
+    <div id="searchResults" class="search-results" style="display:none"></div>
+    <div class="content" id="view"></div>
+  </div>
+</div>
+
+<script>
+/* =========================================================================
+   DATA SPHERE — DATABASE ACADEMY
+   9-сынып · III бөлім «Деректер базасы»
+   ========================================================================= */
+
+/* ---------------------------- PROGRESS ---------------------------------- */
+const STORAGE_KEY = 'datasphere_progress_v1';
+let progress = loadProgress();
+
+function loadProgress(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const p = raw ? JSON.parse(raw) : null;
+    if(p && typeof p === 'object'){ p.topics = p.topics||{}; return p; }
+  }catch(e){}
+  return {topics:{}, final:null, project:null};
+}
+function saveProgress(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); }catch(e){}
+}
+function topicProg(id){
+  if(!progress.topics[id]) progress.topics[id] = {tasks:{}, test:null};
+  if(!progress.topics[id].tasks) progress.topics[id].tasks = {};
+  return progress.topics[id];
+}
+
+/* ---------------------------- DATASETS ---------------------------------- */
+const DATASETS = {
+  library:{
+    title:'📚 Кітапхана кітаптары',
+    columns:[
+      {key:'id',label:'ID',type:'num'},
+      {key:'title',label:'Кітап атауы',type:'text'},
+      {key:'author',label:'Авторы',type:'text'},
+      {key:'year',label:'Шыққан жылы',type:'num'},
+      {key:'genre',label:'Жанры',type:'text'},
+      {key:'copies',label:'Дана саны',type:'num'}
+    ],
+    rows:[
+      {id:1,title:'Абай жолы',author:'Мұхтар Әуезов',year:1942,genre:'Роман-эпопея',copies:5},
+      {id:2,title:'Қан мен тер',author:'Әбдіжәміл Нұрпейісов',year:1961,genre:'Роман',copies:3},
+      {id:3,title:'Аққан жұлдыз',author:'Софы Сматаев',year:1968,genre:'Роман',copies:2},
+      {id:4,title:'Менің атым Қожа',author:'Бердібек Соқпақбаев',year:1957,genre:'Повесть',copies:7},
+      {id:5,title:'Ұшқан ұя',author:'Бауыржан Момышұлы',year:1975,genre:'Повесть',copies:4},
+      {id:6,title:'Көшпенділер',author:'Ілияс Есенберлин',year:1976,genre:'Тарихи роман',copies:6},
+      {id:7,title:'Абай',author:'Мұхтар Әуезов',year:1930,genre:'Роман',copies:2},
+      {id:8,title:'Ботагөз',author:'Сәбит Мұқанов',year:1938,genre:'Роман',copies:3},
+      {id:9,title:'Оян, қазақ!',author:'Міржақып Дулатов',year:1909,genre:'Өлеңдер жинағы',copies:1},
+      {id:10,title:'Қарлығаштың құйрығы неге айыр?',author:'Ыбырай Алтынсарин',year:1879,genre:'Әңгіме',copies:8}
+    ]
+  },
+  students:{
+    title:'🎓 Оқушылардың оқу нәтижелері',
+    columns:[
+      {key:'id',label:'ID',type:'num'},
+      {key:'name',label:'Оқушы',type:'text'},
+      {key:'cls',label:'Сынып',type:'text'},
+      {key:'inf',label:'Информатика',type:'num'},
+      {key:'mat',label:'Математика',type:'num'}
+    ],
+    rows:[
+      {id:1,name:'Айдана',cls:'9А',inf:5,mat:4},
+      {id:2,name:'Данияр',cls:'9Ә',inf:4,mat:5},
+      {id:3,name:'Аружан',cls:'9Б',inf:5,mat:5},
+      {id:4,name:'Нұрсұлтан',cls:'9А',inf:3,mat:4},
+      {id:5,name:'Әли',cls:'9Ә',inf:4,mat:3},
+      {id:6,name:'Мерей',cls:'9Б',inf:4,mat:4},
+      {id:7,name:'Аяулым',cls:'9А',inf:5,mat:3},
+      {id:8,name:'Санжар',cls:'9Ә',inf:3,mat:5},
+      {id:9,name:'Камила',cls:'9Б',inf:5,mat:4},
+      {id:10,name:'Ерасыл',cls:'9А',inf:4,mat:5}
+    ]
+  },
+  shop:{
+    title:'🛒 Дүкен тауарлары',
+    columns:[
+      {key:'id',label:'ID',type:'num'},
+      {key:'name',label:'Тауар атауы',type:'text'},
+      {key:'cat',label:'Санаты',type:'text'},
+      {key:'price',label:'Бағасы (₸)',type:'num'},
+      {key:'qty',label:'Қалдық',type:'num'}
+    ],
+    rows:[
+      {id:1,name:'Дәптер',cat:'Кеңсе тауары',price:120,qty:250},
+      {id:2,name:'Қалам',cat:'Кеңсе тауары',price:80,qty:500},
+      {id:3,name:'Сызғыш',cat:'Кеңсе тауары',price:150,qty:120},
+      {id:4,name:'Рюкзак',cat:'Аксессуар',price:8500,qty:30},
+      {id:5,name:'Қаламсап',cat:'Кеңсе тауары',price:350,qty:200},
+      {id:6,name:'Кітап мұқабасы',cat:'Аксессуар',price:400,qty:75},
+      {id:7,name:'Альбом',cat:'Кеңсе тауары',price:600,qty:60},
+      {id:8,name:'Түсті қарындаш',cat:'Кеңсе тауары',price:950,qty:45},
+      {id:9,name:'Калькулятор',cat:'Техника',price:4500,qty:18},
+      {id:10,name:'Флеш-жад',cat:'Техника',price:3200,qty:40}
+    ]
+  },
+  sport:{
+    title:'🏅 Спорт үйірмелерінің қатысушылары',
+    columns:[
+      {key:'id',label:'ID',type:'num'},
+      {key:'name',label:'Қатысушы',type:'text'},
+      {key:'club',label:'Үйірме',type:'text'},
+      {key:'age',label:'Жасы',type:'num'},
+      {key:'years',label:'Тәжірибесі (жыл)',type:'num'}
+    ],
+    rows:[
+      {id:1,name:'Айдос',club:'Футбол',age:13,years:4},
+      {id:2,name:'Бекзат',club:'Баскетбол',age:14,years:3},
+      {id:3,name:'Гүлназ',club:'Волейбол',age:15,years:5},
+      {id:4,name:'Дархан',club:'Футбол',age:12,years:2},
+      {id:5,name:'Жанна',club:'Жүзу',age:14,years:6},
+      {id:6,name:'Ерлан',club:'Күрес',age:15,years:7},
+      {id:7,name:'Фариза',club:'Волейбол',age:13,years:3},
+      {id:8,name:'Нұрдәулет',club:'Баскетбол',age:16,years:5},
+      {id:9,name:'Ақбота',club:'Жүзу',age:12,years:2},
+      {id:10,name:'Тимур',club:'Күрес',age:14,years:4}
+    ]
+  }
+};
+
+/* ---------------------------- TABLE ENGINE ------------------------------- */
+function applyQuery(rows, q){
+  let out = rows.slice();
+  const search = (q.search||'').trim().toLowerCase();
+  if(search){
+    const keys = q.searchKeys && q.searchKeys.length ? q.searchKeys : Object.keys(rows[0]||{});
+    out = out.filter(r => keys.some(k => String(r[k]).toLowerCase().includes(search)));
+  }
+  (q.filters||[]).forEach(f=>{
+    if(f.value === '' || f.value === null || f.value === undefined) return;
+    const op = f.op || '=';
+    if(op === '=') out = out.filter(r => String(r[f.key]).toLowerCase() === String(f.value).toLowerCase());
+    else if(op === 'contains') out = out.filter(r => String(r[f.key]).toLowerCase().includes(String(f.value).toLowerCase()));
+    else {
+      const b = Number(f.value);
+      if(isNaN(b)) return;
+      out = out.filter(r => {
+        const a = Number(r[f.key]);
+        if(isNaN(a)) return false;
+        if(op === '>') return a > b;
+        if(op === '<') return a < b;
+        if(op === '>=') return a >= b;
+        if(op === '<=') return a <= b;
+        return a === b;
+      });
+    }
+  });
+  if(q.sortKey){
+    const dir = q.sortDir === 'desc' ? -1 : 1;
+    out = out.map((r,i)=>({r,i})).sort((x,y)=>{
+      const a = x.r[q.sortKey], b = y.r[q.sortKey];
+      let cmp;
+      if(typeof a === 'number' && typeof b === 'number') cmp = a - b;
+      else cmp = String(a).localeCompare(String(b), 'kk');
+      if(cmp === 0) return x.i - y.i;
+      return cmp * dir;
+    }).map(o=>o.r);
+  }
+  return out;
+}
+function tableHTML(columns, rows, opts){
+  opts = opts||{};
+  const head = columns.map(c=>{
+    const cls = opts.sortable ? 'sortable' : '';
+    let arrow = '';
+    if(opts.sortable && opts.sortKey === c.key) arrow = opts.sortDir==='desc' ? ' ↓' : ' ↑';
+    return `<th class="${cls}" ${opts.sortable?`data-sortkey="${c.key}"`:''} ${opts.tableId?`data-tableid="${opts.tableId}"`:''}>${c.label}${arrow?`<span class="arrow">${arrow}</span>`:''}</th>`;
+  }).join('');
+  const body = rows.map(r=>{
+    const cls = (opts.rowClass?opts.rowClass(r):'');
+    return `<tr class="${cls}" ${opts.rowAttrs?opts.rowAttrs(r):''}>${columns.map(c=>`<td>${r[c.key]}</td>`).join('')}</tr>`;
+  }).join('');
+  const empty = `<tr><td colspan="${columns.length}" style="text-align:center;color:#8b90a3;padding:22px">Сәйкес жазба табылмады</td></tr>`;
+  return `<div class="tablewrap"><table class="dtable"><thead><tr>${head}</tr></thead><tbody>${rows.length?body:empty}</tbody></table></div>`;
+}
+
+/* =========================================================================
+   TOPIC CONTENT
+   ========================================================================= */
+const TOPICS = [
+/* ------------------------------- 3.1 ----------------------------------- */
+{
+id:'t1', num:'3.1', title:'Деректер базасы',
+short:'Деректер базасы, өріс, жазба, бірегей идентификатор',
+goal:'Деректер базасы дегеніміз не екенін, оның мақсатын, кесте–өріс–жазба ұғымдарын және деректер базасын ұйымдастыру ережелерін меңгеру.',
+theory:`
+<h4>1. Деректер базасы дегеніміз не?</h4>
+<p><b>Деректер базасы</b> (ағылш. <i>database</i>) — белгілі бір ереже бойынша реттелген, өзара байланысқан және ұзақ уақыт сақтауға арналған деректер жиынтығы. Ол ақпаратты жылдам табуға, өзгертуге, сұрыптауға және сүзгілеуге мүмкіндік береді.</p>
+<p>Қарапайым сөзбен айтқанда, деректер базасы — мәліметтерді ретсіз жинап қоймай, белгілі бір құрылымға келтіріп сақтайтын «сандық қойма».</p>
+
+<h4>2. Деректер базасының мақсаты</h4>
+<ul>
+<li>ақпаратты ретті, жүйелі түрде сақтау;</li>
+<li>қажетті мәліметті өте жылдам табу;</li>
+<li>деректерді жаңарту, толықтыру және жою;</li>
+<li>мәліметтерді сұрыптау мен сүзгілеу;</li>
+<li>есептер мен қорытындылар жасау;</li>
+<li>бірнеше пайдаланушының бір мезгілде жұмыс істеуін қамтамасыз ету.</li>
+</ul>
+
+<h4>3. Күнделікті өмірдегі қолданылуы</h4>
+<p>Деректер базасын біз күн сайын пайдаланамыз, кейде байқамаймыз да:</p>
+<ul>
+<li>мектеп кітапханасының кітаптар каталогы;</li>
+<li>мектептің оқушылар тізімі мен электрондық журналы;</li>
+<li>дүкендегі тауарлар мен бағалар туралы мәліметтер;</li>
+<li>спорт үйірмесіне қатысушылардың тізімі;</li>
+<li>емханадағы пациенттердің картотекасы;</li>
+<li>банктегі клиенттердің шоттары;</li>
+<li>әуежайдағы ұшу кестесі.</li>
+</ul>
+
+<h4>4. Кесте, өріс және жазба</h4>
+<p>Деректер базасының негізгі құрылымдық бірлігі — <b>кесте</b>. Кесте жолдар мен бағандардан тұрады.</p>
+<ul>
+<li><b>Өріс</b> — кестенің бір бағаны. Ол объектінің бір қасиетін сипаттайды (мысалы, «Оқушы», «Сынып», «Баға»).</li>
+<li><b>Өріс атауы</b> — бағанның ең жоғарғы бөлігінде жазылады және қай мәлімет жазылатынын көрсетеді.</li>
+<li><b>Жазба</b> — кестенің бір жолы. Ол бір нақты объект туралы толық ақпаратты қамтиды.</li>
+<li><b>Жазбалар жиынтығы</b> — кестедегі барлық жолдар.</li>
+</ul>
+
+<h4>5. Деректер базасының қарапайым құрылымы</h4>
+<div class="tablewrap" style="margin:10px 0">
+<table class="dtable">
+<thead><tr><th>ID</th><th>Оқушы</th><th>Сынып</th><th>Информатика бағасы</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Айдана</td><td>9А</td><td>5</td></tr>
+<tr><td>2</td><td>Данияр</td><td>9Ә</td><td>4</td></tr>
+<tr><td>3</td><td>Аружан</td><td>9Б</td><td>5</td></tr>
+</tbody>
+</table>
+</div>
+<p>Мұнда <b>өрістер</b>: ID, Оқушы, Сынып, Информатика бағасы. <b>Жазбалар</b>: 1-жол (Айдана туралы), 2-жол (Данияр туралы), 3-жол (Аружан туралы). Барлығы — 3 жазба, 4 өріс, 12 ұяшық.</p>
+
+<h4>6. Бірегей идентификатор (кілт өріс)</h4>
+<p><b>Бірегей идентификатор</b> — әрбір жазбаны басқаларынан анық ажырататын өріс. Көбінесе бұл <code>ID</code> өрісі. Ол қайталанбайды: бір кестеде екі түрлі жазбаның ID нөмірі бірдей болмауы керек.</p>
+<div class="callout purple"><b>Мысал:</b> Екі оқушының аты-жөні бірдей болуы мүмкін (екі «Аружан»). Бірақ олардың <code>ID</code> нөмірі әртүрлі болса, оларды шатастырмаймыз.</div>
+
+<h4>7. Деректер базасын ұйымдастыру ережелері</h4>
+<ol>
+<li>Кестенің бірінші жолы — өріс атаулары.</li>
+<li>Әр бағанда тек <b>бір типтегі</b> ақпарат болуы керек (сан, мәтін, күн).</li>
+<li>Әр жазба бір жолға жазылады.</li>
+<li>Бос жолдар мен бос бағандар болмауы керек.</li>
+<li>Өріс атаулары қайталанбауы және қысқа, нақты болуы керек.</li>
+<li>Қайталанатын жазбалар мен қате деректер жойылуы керек.</li>
+<li>Әр кестеде бірегей идентификатор болғаны дұрыс.</li>
+</ol>
+
+<h4>8. Деректер базасы мен қарапайым кестенің байланысы</h4>
+<p>Кез келген кестені деректер базасы деп атауға болмайды. Егер кесте жоғарыдағы ережелерге сай құрылса, онда оны <b>деректер базасы</b> ретінде пайдалануға болады: іздеу, сұрыптау және сүзгілеу дұрыс жұмыс істейді.</p>
+`,
+examples:`
+<ul>
+<li><b>Мектеп кітапханасының базасы:</b> Кітап нөмірі, Кітап атауы, Авторы, Шыққан жылы, Жанры, Дана саны.</li>
+<li><b>Оқушылар тізімі:</b> ID, Аты-жөні, Сыныбы, Туған күні, Телефоны.</li>
+<li><b>Дүкен тауарларының базасы:</b> Тауар коды, Атауы, Санаты, Бағасы, Қалдық саны.</li>
+<li><b>Спорт үйірмесінің қатысушылары:</b> ID, Аты, Үйірме атауы, Жасы, Тәжірибесі.</li>
+</ul>
+<div class="callout orange"><b>Назар аудар:</b> «Аты-жөні» өрісінде сан болмайды, ал «Бағасы» өрісінде мәтін болмайды. Әр өріс өз типіндегі деректерді ғана қабылдайды.</div>
+`,
+steps:[
+'Деректер базасын құру мақсатын анықта: бұл база не үшін керек?',
+'Кестеге қандай объектілер туралы ақпарат жазылатынын белгіле (кітаптар, оқушылар, тауарлар).',
+'Әр объектінің қасиеттерін тізіп шық — осылар өріс атаулары болады.',
+'Бірінші жолға өріс атауларын жаз.',
+'Әр жазбаны жеке жолға орналастыр.',
+'Бір бағандағы деректер типі бірдей екенін тексер.',
+'Бірегей идентификатор (ID) өрісін қос.',
+'Бос жолдар мен қайталанатын жазбаларды жой.',
+'Кестені іздеу, сұрыптау және сүзгілеуге дайында.'
+],
+remember:[
+'Деректер базасы — реттелген, өзара байланысқан деректер жиынтығы.',
+'Өріс — баған, жазба — жол.',
+'Бірінші жол — өріс атаулары.',
+'Бір бағанда тек бір типтегі деректер болады.',
+'Бірегей идентификатор әр жазбаны ажыратады және қайталанбайды.'
+],
+tasks:[
+  {
+    type:'multiselect', id:'t1a',
+    title:'1-тапсырма. Өріс пен жазбаны анықта',
+    prompt:'Төмендегі кестеге қара. Қай нұсқалар <b>өріс атаулары</b> болып табылады? Дұрыс жауаптарды таңда.',
+    table:{columns:[{key:'id',label:'ID'},{key:'name',label:'Оқушы'},{key:'cls',label:'Сынып'},{key:'grade',label:'Информатика бағасы'}],
+      rows:[{id:1,name:'Айдана',cls:'9А',grade:5},{id:2,name:'Данияр',cls:'9Ә',grade:4},{id:3,name:'Аружан',cls:'9Б',grade:5},{id:4,name:'Нұрсұлтан',cls:'9А',grade:3},{id:5,name:'Әли',cls:'9Ә',grade:4}]},
+    options:['ID','Оқушы','Сынып','Информатика бағасы','Айдана','9А','5','Данияр'],
+    correct:[0,1,2,3],
+    explain:'Өріс атаулары — бағандардың жоғарғы жағындағы атаулар: ID, Оқушы, Сынып, Информатика бағасы. «Айдана», «9А», «5», «Данияр» — бұл жазбалардың ішіндегі нақты мәндер.'
+  },
+  {
+    type:'multiselect', id:'t1b',
+    title:'2-тапсырма. Деректер базасын құрастыр',
+    prompt:'«Кітапхана» деректер базасы үшін қажетті өрістерді таңда. Артық нұсқаларды таңдама.',
+    options:['Кітап атауы','Авторы','Шыққан жылы','Жанры','Кітап нөмірі','Мұғалімнің телефоны','Ауа райы болжамы','Сабақ кестесі'],
+    correct:[0,1,2,3,4],
+    explain:'Кітапхана базасында кітап туралы ақпарат қана сақталады: атауы, авторы, шыққан жылы, жанры және кітап нөмірі. Мұғалімнің телефоны, ауа райы және сабақ кестесі бұл базаға қатысы жоқ.'
+  }
+]
+},
+/* ------------------------------- 3.2 ----------------------------------- */
+{
+id:'t2', num:'3.2', title:'Excel кестелік процессорында деректер базасын құру',
+short:'Кесте құру, баған атаулары, деректер типтері, форматтау',
+goal:'Excel бағдарламасында деректер базасын дұрыс құруды, баған атауларын енгізуді, деректерді жолдар бойынша орналастыруды және кестені іздеуге, сұрыптауға, сүзгілеуге дайындауды үйрену.',
+theory:`
+<h4>1. Excel кестелік процессорының мүмкіндіктері</h4>
+<p>Microsoft Excel — кестелік процессор. Ол деректерді сақтауға, есептеуге, сұрыптауға, сүзгілеуге және диаграмма құруға мүмкіндік береді. Excel-де құрылған кестені толыққанды <b>деректер базасы</b> ретінде пайдалануға болады.</p>
+<p>Excel жұмыс парағы <b>ұяшықтардан</b> тұрады. Әр ұяшықтың өз мекенжайы бар: баған әрпі + жол нөмірі (мысалы, <code>A1</code>, <code>C5</code>).</p>
+
+<h4>2. Деректер базасына арналған кесте құру</h4>
+<p>Excel-де деректер базасын құру келесі ретпен жүзеге асады:</p>
+<ol>
+<li>Жұмыс парағының бірінші жолына <b>баған атауларын</b> енгізу.</li>
+<li>Әр бағанға <b>бір типтегі</b> ақпаратты енгізу.</li>
+<li>Әр жазбаны (объектіні) <b>жеке жолға</b> орналастыру.</li>
+<li>Кестені форматтау (шекаралар, қою қаріп, фон түсі).</li>
+</ol>
+
+<h4>3. Баған атауларын енгізу</h4>
+<p>Баған атауы қысқа, нақты және қайталанбайтын болуы керек. Мысалы: <code>ID</code>, <code>Кітап атауы</code>, <code>Авторы</code>, <code>Шыққан жылы</code>, <code>Жанры</code>, <code>Дана саны</code>.</p>
+<div class="callout purple"><b>Есте сақта:</b> Баған атаулары біріктірілген ұяшықтарда болмауы керек. Әр атау — жеке бір ұяшықта.</div>
+
+<h4>4. Деректерді жолдар бойынша орналастыру</h4>
+<p>Әр жол — бір объект туралы толық ақпарат. Мысалы, бір кітап туралы барлық мәлімет бір жолда тұруы керек:</p>
+<div class="tablewrap" style="margin:10px 0">
+<table class="dtable">
+<thead><tr><th>ID</th><th>Кітап атауы</th><th>Авторы</th><th>Шыққан жылы</th><th>Дана саны</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Абай жолы</td><td>Мұхтар Әуезов</td><td>1942</td><td>5</td></tr>
+<tr><td>2</td><td>Қан мен тер</td><td>Әбдіжәміл Нұрпейісов</td><td>1961</td><td>3</td></tr>
+</tbody>
+</table>
+</div>
+
+<h4>5. Әр бағанға бір типтегі ақпаратты енгізу</h4>
+<ul>
+<li><b>Мәтіндік</b> деректер: атауы, авторы, жанры.</li>
+<li><b>Сандық</b> деректер: ID, шыққан жылы, дана саны.</li>
+<li><b>Күн</b> типті деректер: келіп түскен күні, туған күні.</li>
+</ul>
+<p>Егер «Шыққан жылы» бағанына «мың тоғыз жүз қырық екі» деп жазсақ, сұрыптау дұрыс жұмыс істемейді.</p>
+
+<h4>6. Бос жолдар мен бағандардан аулақ болу</h4>
+<p>Кесте ішіндегі бос жолдар сүзгілеу мен сұрыптау кезінде қателікке әкеледі. Excel бос жолды кестенің соңы деп қабылдауы мүмкін, сондықтан қалған жазбалар есепке алынбайды.</p>
+
+<h4>7. Қайталанатын және қате деректер</h4>
+<ul>
+<li>Бір жазбаның екі рет жазылуы — <b>қайталанатын жазба</b>.</li>
+<li>Қате жазылған мән (мысалы, «9А» орнына «9а» немесе «АА») — <b>қате дерек</b>.</li>
+<li>Қате деректер іздеу мен сүзгілеу нәтижесін бұрмалайды.</li>
+</ul>
+
+<h4>8. Кестені форматтау</h4>
+<ul>
+<li>Баған атауларын <b>қою қаріппен</b> және фон түсімен ерекшелеу.</li>
+<li>Кестеге жұқа шекаралар қою.</li>
+<li>Баған енін мазмұнға қарай реттеу.</li>
+<li>Сандық мәндерді оң жаққа, мәтінді сол жаққа туралау.</li>
+<li>Ұзын кестелерде бірінші жолды бекіту (<i>View → Freeze Panes</i>).</li>
+</ul>
+
+<h4>9. Деректерді кейін іздеуге, сұрыптауға және сүзгілеуге дайындау</h4>
+<div class="callout"><b>Дайын кестенің белгілері:</b> бірінші жол — атаулар; бос жолдар жоқ; әр бағанда бір типті деректер; қайталанатын жазбалар жойылған; бірегей ID бар.</div>
+`,
+examples:`
+<p><b>Мысал: «Мектеп кітапханасының деректер базасы»</b></p>
+<div class="tablewrap">
+<table class="dtable">
+<thead><tr><th>ID</th><th>Кітап атауы</th><th>Авторы</th><th>Шыққан жылы</th><th>Жанры</th><th>Дана саны</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Абай жолы</td><td>Мұхтар Әуезов</td><td>1942</td><td>Роман-эпопея</td><td>5</td></tr>
+<tr><td>2</td><td>Менің атым Қожа</td><td>Бердібек Соқпақбаев</td><td>1957</td><td>Повесть</td><td>7</td></tr>
+<tr><td>3</td><td>Көшпенділер</td><td>Ілияс Есенберлин</td><td>1976</td><td>Тарихи роман</td><td>6</td></tr>
+</tbody>
+</table>
+</div>
+<div class="callout orange"><b>Қате нұсқа:</b> бір бағанда «1942» саны мен «Мұхтар Әуезов» мәтіні араласып кетсе, кесте деректер базасы ретінде жарамсыз болады.</div>
+`,
+steps:[
+'Excel бағдарламасын ашып, жаңа жұмыс парағын аш.',
+'Бірінші жолға баған атауларын жаз: ID, Кітап атауы, Авторы, Шыққан жылы, Жанры, Дана саны.',
+'Баған атауларын қою қаріппен және фон түсімен ерекшеле.',
+'Екінші жолдан бастап әр кітап туралы мәліметті жеке жолға енгіз.',
+'«Шыққан жылы» мен «Дана саны» бағандарына тек сан енгізілгенін тексер.',
+'Бос жолдар мен бос ұяшықтарды жой.',
+'Қайталанатын жазбаларды тексеріп, жой.',
+'Кестеге жұқа шекаралар қой және баған енін ретте.',
+'Бірінші жолды бекітіп (Freeze Panes), кестені сақта.'
+],
+remember:[
+'Бірінші жол — тек баған атаулары.',
+'Әр жазба — жеке жол.',
+'Бір бағанда бір типтегі деректер ғана.',
+'Бос жолдар мен қайталанатын жазбалар болмауы керек.',
+'Форматтау кестені оқуға ыңғайлы етеді.'
+],
+tasks:[
+  {
+    type:'fillblanks', id:'t2a',
+    title:'1-тапсырма. Кестені толықтыр',
+    prompt:'Баған атаулары берілген. Әр жолдағы бос ұяшыққа тиісті мәнді таңдап, деректер базасын дұрыс құрастыр.',
+    columns:[{key:'id',label:'ID'},{key:'title',label:'Кітап атауы'},{key:'author',label:'Авторы'},{key:'year',label:'Шыққан жылы'},{key:'copies',label:'Дана саны'}],
+    rows:[
+      {id:1,title:'Абай жолы',author:'Мұхтар Әуезов',year:1942,copies:null},
+      {id:2,title:'Менің атым Қожа',author:null,year:1957,copies:7},
+      {id:3,title:'Көшпенділер',author:'Ілияс Есенберлин',year:null,copies:6}
+    ],
+    blanks:[
+      {row:0,key:'copies',options:['5','Мұхтар Әуезов','1942'],answer:'5'},
+      {row:1,key:'author',options:['Бердібек Соқпақбаев','1957','7'],answer:'Бердібек Соқпақбаев'},
+      {row:2,key:'year',options:['Ілияс Есенберлин','1976','6'],answer:'1976'}
+    ],
+    explain:'Әр ұяшыққа сол бағанның типіне сәйкес мән қойылады: «Дана саны» — сан, «Авторы» — мәтін, «Шыққан жылы» — сан.'
+  },
+  {
+    type:'clickerrors', id:'t2b',
+    title:'2-тапсырма. Қателерді тап',
+    prompt:'Төмендегі кесте деректер базасы ретінде қате құрылған. <b>Қате ұяшықтарды</b> басып белгіле (бос атау, аралас деректер, бос жол).',
+    columns:[{key:'c0',label:'ID'},{key:'c1',label:'Кітап атауы'},{key:'c2',label:'Авторы'},{key:'c3',label:'Шыққан жылы'}],
+    rows:[
+      {c0:'1',c1:'Абай жолы',c2:'Мұхтар Әуезов',c3:'1942'},
+      {c0:'2',c1:'Қан мен тер',c2:'Әбдіжәміл Нұрпейісов',c3:'1961'},
+      {c0:'',c1:'',c2:'',c3:''},
+      {c0:'3',c1:'Менің атым Қожа',c2:'Бердібек Соқпақбаев',c3:'мың тоғыз жүз елу жеті'},
+      {c0:'4',c1:'1976',c2:'Ілияс Есенберлин',c3:'1976'}
+    ],
+    errors:['2-c0','2-c1','2-c2','2-c3','3-c3','4-c1'],
+    explain:'Қателер: 3-жол толығымен бос (бос жол); 4-жолда «Шыққан жылы» мәтінмен жазылған (сан болуы керек); 5-жолда «Кітап атауы» бағанында сан тұр (мәтін болуы керек).'
+  }
+]
+},
+/* ------------------------------- 3.3 ----------------------------------- */
+{
+id:'t3', num:'3.3', title:'Excel кестелік процессорында ақпаратты іздеу әдістері',
+short:'Іздеу, Ctrl+F, іздеу нәтижесін талдау',
+goal:'Excel кестесінде қажетті ақпаратты іздеудің әдістерін, іздеу жолағын пайдалануды және іздеу нәтижесін талдауды үйрену.',
+theory:`
+<h4>1. Деректерді іздеудің мақсаты</h4>
+<p>Кесте үлкейген сайын қажетті жазбаны көзбен табу қиындайды. <b>Іздеу</b> — кестеден белгілі бір шартқа сәйкес келетін ақпаратты жылдам табу әрекеті.</p>
+
+<h4>2. Кестеден қажетті ақпаратты табу</h4>
+<p>Іздеу екі жолмен жүзеге асады:</p>
+<ul>
+<li><b>Қолмен іздеу</b> — кестені көзбен шолып, қажет жазбаны табу (шағын кестелерде ғана тиімді).</li>
+<li><b>Автоматты іздеу</b> — бағдарламаның іздеу құралдарын пайдалану (үлкен кестелерде тиімді).</li>
+</ul>
+
+<h4>3. Іздеу жолағын пайдалану</h4>
+<p>Excel-де іздеу үшін <code>Ctrl + F</code> пернелер тіркесімін басу керек. Ашылаған терезеге ізделетін сөзді немесе мәнді енгізіп, <b>Find All</b> (Барлығын табу) немесе <b>Find Next</b> (Келесіні табу) батырмасын басамыз.</p>
+<div class="callout purple"><b>Пайдалы:</b> <code>Ctrl + F</code> — іздеу; <code>Ctrl + H</code> — табу және алмастыру.</div>
+
+<h4>4. Белгілі бір сөзді немесе мәнді табу</h4>
+<p>Іздеу жолағына:</p>
+<ul>
+<li>автордың атын жазсақ — сол автордың барлық кітаптары табылады;</li>
+<li>кітап атауының бір бөлігін жазсақ — сол бөлігі бар жазбалар табылады;</li>
+<li>нақты санды жазсақ — сол мәні бар ұяшықтар табылады.</li>
+</ul>
+<p>Excel іздеу кезінде әдетте үлкен-кіші әріпті ажыратпайды: «абай» мен «Абай» бірдей табылады.</p>
+
+<h4>5. Іздеу нәтижесін талдау</h4>
+<p>Іздеу нәтижесін алған соң мынаны тексеру керек:</p>
+<ul>
+<li>табылған жазба шынымен қажет жазба ма?</li>
+<li>бірнеше нәтиже табылса, олардың қайсысы дұрыс?</li>
+<li>іздеу сөзі басқа бағандардан да табылып кетпеді ме?</li>
+</ul>
+
+<h4>6. Бірнеше шартқа сәйкес келетін ақпаратты анықтау</h4>
+<p>Кейде бір шарт жеткіліксіз. Мысалы: «Авторы Мұхтар Әуезов <b>және</b> шыққан жылы 1942-ден кейін» деген екі шартты бірге қолдану қажет. Мұндай жағдайда қарапайым іздеу жеткіліксіз — <b>сүзгілеу</b> немесе <b>кеңейтілген сүзгі</b> қолданылады.</p>
+
+<h4>7. Іздеу мен сүзгінің айырмашылығы</h4>
+<div class="tablewrap">
+<table class="dtable">
+<thead><tr><th>Іздеу</th><th>Сүзгілеу</th></tr></thead>
+<tbody>
+<tr><td>Қажет мәнді тауып, белгілейді</td><td>Шартқа сай емес жолдарды жасырады</td></tr>
+<tr><td>Барлық жолдар көріне береді</td><td>Тек сәйкес жолдар көрінеді</td></tr>
+<tr><td>Бір сөзді/мәнді іздейді</td><td>Бір немесе бірнеше шарт қоя алады</td></tr>
+<tr><td>Деректерді өзгертпейді</td><td>Деректерді өзгертпейді</td></tr>
+</tbody>
+</table>
+</div>
+`,
+examples:`
+<p><b>Мысал:</b> Кітапхана кестесінен Мұхтар Әуезовтің кітаптарын табу.</p>
+<ol>
+<li><code>Ctrl + F</code> басамыз.</li>
+<li>Іздеу жолағына «Әуезов» деп жазамыз.</li>
+<li><b>Find All</b> басамыз — нәтижеде «Абай жолы» (1942) және «Абай» (1930) кітаптары шығады.</li>
+<li>Нәтижені талдаймыз: екі кітап та осы авторға тиесілі.</li>
+</ol>
+<div class="callout orange"><b>Ескерту:</b> Егер «Абай» деп іздесек, «Абай жолы» да, «Абай» да табылады — себебі іздеу сөздің бір бөлігі бойынша да жұмыс істейді.</div>
+`,
+steps:[
+'Іздейтін мәнді анықта (автор аты, кітап атауы, сан).',
+'<code>Ctrl + F</code> пернелерін басып, іздеу терезесін аш.',
+'Іздеу жолағына қажет сөзді немесе мәнді енгіз.',
+'«Find All» батырмасын басып, барлық нәтижені көр.',
+'Табылған жазбалардың дұрыстығын тексер.',
+'Егер нәтиже көп болса, іздеу сөзін нақтыла.',
+'Бірнеше шарт қажет болса, сүзгілеуге көш.',
+'Іздеу терезесін жабу үшін Esc пернесін бас.'
+],
+remember:[
+'<code>Ctrl + F</code> — іздеу терезесін ашады.',
+'Іздеу мәнді табады, бірақ жолдарды жасырмайды.',
+'Сүзгі шартқа сай емес жолдарды жасырады.',
+'Іздеу нәтижесін әрқашан тексеру керек.',
+'Бірнеше шарт үшін сүзгі немесе кеңейтілген сүзгі қолданылады.'
+],
+tasks:[
+  {
+    type:'tabletask', id:'t3a', mode:'find',
+    title:'1-тапсырма. Қажетті жазбаны тап',
+    prompt:'Кестеден <b>«Мұхтар Әуезовтің 1930 жылы шыққан кітабын»</b> тауып, сол жолды бас. Іздеу жолағын пайдалан.',
+    columns:DATASETS.library.columns, rows:DATASETS.library.rows,
+    searchKeys:['title','author','genre'],
+    targetId:7,
+    explain:'Бұл — «Абай» кітабы (ID = 7, 1930 жыл). Оны табу үшін іздеу жолағына «Әуезов» немесе «Абай» деп жазуға болады.'
+  },
+  {
+    type:'quiz', id:'t3b',
+    title:'2-тапсырма. Іздеу стратегиясын таңда',
+    prompt:'Әр жағдайға ең тиімді іздеу тәсілін таңда.',
+    questions:[
+      {q:'Кестеде 500 жазба бар. Бір оқушының тегін табу керек.',o:['Іздеу жолағын (Ctrl+F) пайдалану','Кестені көзбен шолып шығу','Кестені қайта жазу','Барлық жазбаны жою'],a:0,e:'Үлкен кестеде қолмен іздеу тиімсіз, сондықтан Ctrl+F қолданамыз.'},
+      {q:'«9А сыныбындағы және информатика бағасы 5 болатын оқушыларды» табу керек.',o:['Қарапайым іздеу','Сүзгілеу немесе кеңейтілген сүзгі','Кестені сұрыптау','Барлық жазбаны жою'],a:1,e:'Екі шарт қатар қойылады, сондықтан сүзгілеу қажет.'},
+      {q:'Кестедегі ең үлкен бағаны табу керек.',o:['Іздеу жолағы','Сандық бағанды кему ретімен сұрыптау','Мәтіндік сүзгі','Кестені көшіру'],a:1,e:'Ең үлкен мәнді табудың ең жылдам жолы — сұрыптау.'},
+      {q:'Кестеде «Абай» сөзі қай бағандарда кездесетінін білу керек.',o:['Find All (Барлығын табу)','Find Next (Келесіні табу)','Кестені басып шығару','Ұяшықты бояу'],a:0,e:'Find All барлық кездесулерді тізім етіп көрсетеді.'}
+    ]
+  }
+]
+},
+/* ------------------------------- 3.4 ----------------------------------- */
+{
+id:'t4', num:'3.4', title:'Деректерді сұрыптау',
+short:'Өсу/кему реті, әліпби, сандар, күн, көп деңгейлі сұрыптау',
+goal:'Деректерді өсу және кему ретімен, әліпби бойынша, сандық мәндер және күн бойынша сұрыптауды, сондай-ақ бірнеше өріс бойынша сұрыптауды үйрену.',
+theory:`
+<h4>1. Сұрыптау дегеніміз не?</h4>
+<p><b>Сұрыптау</b> — деректерді белгілі бір өріс бойынша тәртіпке келтіру, яғни жолдардың орнын өзгерту. Сұрыптау кезінде <b>бүкіл жазба</b> (бір жолдағы барлық ұяшықтар) бірге жылжиды.</p>
+<div class="callout orange"><b>Маңызды:</b> Егер тек бір бағанды ғана сұрыптасақ, жолдар арасындағы байланыс бұзылады — мысалы, оқушының аты бір жолда, бағасы басқа жолда қалып қояды.</div>
+
+<h4>2. Өсу ретімен сұрыптау</h4>
+<p>Кішіден үлкенге қарай: <code>1, 2, 3, 4, 5</code> немесе <code>А, Ә, Б, В, Г...</code></p>
+
+<h4>3. Кему ретімен сұрыптау</h4>
+<p>Үлкеннен кішіге қарай: <code>5, 4, 3, 2, 1</code> немесе <code>Я, Ю, Э...</code></p>
+
+<h4>4. Әліпби бойынша сұрыптау</h4>
+<p>Мәтіндік деректер қазақ әліпбиінің ретімен орналасады: А, Ә, Б, В, Г, Ғ, Д, Е, Ё, Ж, З, И, Й, К, Қ, Л, М, Н, Ң, О, Ө, П, Р, С, Т, У, Ұ, Ү, Ф, Х, Һ, Ц, Ч, Ш, Щ, Ъ, Ы, І, Ь, Э, Ю, Я.</p>
+
+<h4>5. Сандық мәндер бойынша сұрыптау</h4>
+<p>Бағалар, бағалар, жылдар, сандар — осылардың барлығы сандық сұрыптауға жатады. Сандар мәтін ретінде сақталса, сұрыптау қате шығады: мысалы, «100» мәтін ретінде «20»-дан бұрын тұруы мүмкін.</p>
+
+<h4>6. Күн бойынша сұрыптау</h4>
+<p>Күндер хронологиялық ретпен орналасады: ең ерте күннен бастап немесе керісінше. Күн форматы дұрыс болмаса (мысалы, «12 наурыз» деп жазылса), сұрыптау дұрыс жұмыс істемейді.</p>
+
+<h4>7. Бірнеше өріс бойынша сұрыптау</h4>
+<p>Бірнеше деңгейлі сұрыптау (<i>Custom Sort</i>) арқылы алдымен бірінші өріс, ал оның мәндері тең болған жағдайда екінші өріс бойынша сұрыптаймыз.</p>
+<p><b>Мысал:</b> Алдымен «Сынып» бойынша, содан кейін «Информатика бағасы» бойынша кему ретімен.</p>
+
+<h4>8. Сұрыптау мен сүзгілеудің айырмашылығы</h4>
+<div class="tablewrap">
+<table class="dtable">
+<thead><tr><th>Сұрыптау</th><th>Сүзгілеу</th></tr></thead>
+<tbody>
+<tr><td>Жолдардың орнын өзгертеді</td><td>Жолдарды жасырады, орнын өзгертпейді</td></tr>
+<tr><td>Барлық жазба көрінеді</td><td>Тек шартқа сай жазбалар көрінеді</td></tr>
+<tr><td>Ретті анықтайды</td><td>Іріктеп көрсетеді</td></tr>
+</tbody>
+</table>
+</div>
+`,
+examples:`
+<p><b>Мысал 1.</b> «Информатика бағасы» бағанын кему ретімен сұрыптау:</p>
+<div class="tablewrap"><table class="dtable">
+<thead><tr><th>Оқушы</th><th>Сынып</th><th>Информатика</th></tr></thead>
+<tbody>
+<tr><td>Айдана</td><td>9А</td><td>5</td></tr>
+<tr><td>Аружан</td><td>9Б</td><td>5</td></tr>
+<tr><td>Данияр</td><td>9Ә</td><td>4</td></tr>
+<tr><td>Әли</td><td>9Ә</td><td>4</td></tr>
+<tr><td>Нұрсұлтан</td><td>9А</td><td>3</td></tr>
+</tbody></table></div>
+<p><b>Мысал 2.</b> Алдымен «Сынып» (өсу), содан кейін «Информатика» (кему) бойынша сұрыптау — 9А сыныбының ішінде бағалар кему ретімен тұрады.</p>
+`,
+steps:[
+'Сұрыптайтын бағанды анықта.',
+'Кестенің кез келген ұяшығын таңда (немесе бүкіл кестені белгіле).',
+'<b>Data → Sort</b> командасын аш.',
+'«Sort by» тізімінен қажет өріс атауын таңда.',
+'«Order» тізімінен өсу (A→Z, Smallest to Largest) немесе кему (Z→A, Largest to Smallest) ретін таңда.',
+'Қосымша өріс қажет болса, <b>Add Level</b> батырмасын басып, екінші деңгейді қос.',
+'«My data has headers» белгісін қойып, бірінші жол сұрыпталмайтынын қамтамасыз ет.',
+'OK батырмасын басып, нәтижені тексер.',
+'Барлық жолдың мазмұны бірге жылжығанын тексер.'
+],
+remember:[
+'Сұрыптау — жолдардың орнын өзгерту.',
+'Өсу: кішіден үлкенге. Кему: үлкеннен кішіге.',
+'Сұрыптау кезінде бүкіл жазба бірге жылжиды.',
+'Бірнеше өріс бойынша сұрыптау мүмкіндігі бар.',
+'Сұрыптау — реттейді, сүзгілеу — іріктейді.'
+],
+tasks:[
+  {
+    type:'tabletask', id:'t4a', mode:'sort',
+    title:'1-тапсырма. Кестені сұрыпта',
+    prompt:'Кестені <b>«Информатика» бағаны бойынша кему ретімен</b> сұрыпта. Баған атауын басып, керек бағытты таңда.',
+    columns:DATASETS.students.columns, rows:DATASETS.students.rows,
+    required:{key:'inf', dir:'desc'},
+    explain:'Кему ретімен сұрыптағанда ең жоғары баға (5) жоғарыда, ең төменгі баға (3) төменде тұрады. Барлық оқушы деректері бірге жылжиды.'
+  },
+  {
+    type:'quiz', id:'t4b',
+    title:'2-тапсырма. Сұрыптау ретін таңда',
+    prompt:'Төмендегі жағдайлар үшін дұрыс сұрыптау әдісін таңда.',
+    questions:[
+      {q:'Оқушыларды әліпби бойынша А-дан Я-ға қарай орналастыру керек.',o:['Кему ретімен','Өсу ретімен','Күн бойынша','Сүзгілеу'],a:1,e:'Әліпби бойынша А-дан бастау — өсу реті.'},
+      {q:'Ең қымбат тауарларды жоғарыда көрсету керек.',o:['Баға бойынша кему','Баға бойынша өсу','Атауы бойынша өсу','Санаты бойынша'],a:0,e:'Ең үлкен мән жоғарыда болуы — кему реті.'},
+      {q:'Сабақ кестесін ең ерте күннен бастап орналастыру керек.',o:['Мәтін бойынша кему','Күн бойынша өсу','Сан бойынша кему','Күн бойынша кему'],a:1,e:'Ең ерте күннен бастау — күн бойынша өсу реті.'},
+      {q:'Алдымен сынып бойынша, одан кейін әр сыныптың ішінде баға бойынша сұрыптау керек.',o:['Қарапайым сұрыптау','Көп деңгейлі сұрыптау (Add Level)','Сүзгілеу','Іздеу'],a:1,e:'Екі өріс бойынша сұрыптау — көп деңгейлі сұрыптау.'},
+      {q:'5, 3, 8, 1 сандарын өсу ретімен сұрыптау нәтижесі қандай?',o:['1, 3, 5, 8','8, 5, 3, 1','5, 3, 8, 1','3, 5, 8, 1'],a:0,e:'Өсу реті — кішіден үлкенге: 1, 3, 5, 8.'}
+    ]
+  }
+]
+},
+/* ------------------------------- 3.5 ----------------------------------- */
+{
+id:'t5', num:'3.5', title:'Деректерді сүзгілеу',
+short:'Сүзгі, бір шарт, мәтіндік және сандық сүзгі',
+goal:'Деректерді бір шарт бойынша сүзгілеуді, мәтіндік және сандық сүзгілерді қолдануды, сүзгі мен сұрыптаудың айырмашылығын түсінуді үйрену.',
+theory:`
+<h4>1. Сүзгілеу ұғымы</h4>
+<p><b>Сүзгілеу</b> — белгілі бір шартқа сәйкес келетін жолдарды ғана көрсету, қалғандарын уақытша жасыру. Сүзгілеу кезінде деректер <b>жойылмайды</b>, тек көрінбейді.</p>
+
+<h4>2. Сүзгілеудің мақсаты</h4>
+<ul>
+<li>үлкен кестеден қажетті жазбаларды ғана көру;</li>
+<li>талдау жүргізу (мысалы, белгілі бір сыныптың үлгерімі);</li>
+<li>есептер мен қорытындылар жасау;</li>
+<li>қажет емес ақпаратты уақытша жасыру.</li>
+</ul>
+
+<h4>3. Бір шарт бойынша сүзгілеу</h4>
+<p>Ең қарапайым сүзгі — бір баған бойынша бір шарт қою. Мысалы: «Сынып = 9А».</p>
+<p>Excel-де сүзгіні қосу үшін кестенің кез келген ұяшығын таңдап, <b>Data → Filter</b> командасын орындаймыз. Сонда әр баған атауында кішкене <b>▼</b> белгісі пайда болады.</p>
+
+<h4>4. Мәтіндік мән бойынша сүзгілеу</h4>
+<p>Мәтіндік сүзгі опциялары:</p>
+<ul>
+<li><b>Equals</b> (тең) — «9А» мәніне дәл тең;</li>
+<li><b>Does Not Equal</b> (тең емес);</li>
+<li><b>Begins With</b> (басталады) — «А» әрпімен басталатын атаулар;</li>
+<li><b>Ends With</b> (аяқталады);</li>
+<li><b>Contains</b> (құрайды) — ішінде «Әуезов» сөзі бар жазбалар.</li>
+</ul>
+
+<h4>5. Сандық мән бойынша сүзгілеу</h4>
+<p>Сандық сүзгі опциялары:</p>
+<ul>
+<li><b>Equals</b> — дәл тең (Баға = 5);</li>
+<li><b>Greater Than</b> — үлкен (Баға > 4);</li>
+<li><b>Less Than</b> — кіші (Баға &lt; 3);</li>
+<li><b>Between</b> — аралықта (Баға 3-тен 5-ке дейін);</li>
+<li><b>Top 10</b> — ең үлкен 10 мән.</li>
+</ul>
+
+<h4>6. Белгілі бір бағасы бар оқушыларды көрсету</h4>
+<p>Мысалы, тек «Информатика бағасы = 5» болатын оқушыларды көрсету үшін «Информатика» бағанындағы ▼ белгісін басып, тек «5» мәнін белгілейміз.</p>
+
+<h4>7. Белгілі бір сыныптың жазбаларын іріктеу</h4>
+<p>«Сынып» бағанындағы ▼ белгісін басып, «9А» мәнін ғана қалдырамыз. Нәтижеде тек 9А сыныбының оқушылары көрінеді.</p>
+
+<h4>8. Сұрыптау мен сүзгілеудің негізгі айырмашылығы</h4>
+<div class="callout purple"><b>Қысқаша:</b> Сұрыптау — <i>реттейді</i> (барлық жазба көрінеді, бірақ жаңа тәртіпте). Сүзгілеу — <i>іріктейді</i> (тек шартқа сай жазбалар көрінеді).</div>
+<p>Сүзгіні алу үшін <b>Data → Clear</b> (тазалау) немесе ▼ белгісінен <b>Clear Filter</b> командасын таңдаймыз. Сонда барлық жазба қайта көрінеді.</p>
+`,
+examples:`
+<p><b>Мысал 1.</b> Тек 9А сыныбының оқушыларын көрсету:</p>
+<div class="tablewrap"><table class="dtable">
+<thead><tr><th>ID</th><th>Оқушы</th><th>Сынып</th><th>Информатика</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Айдана</td><td>9А</td><td>5</td></tr>
+<tr><td>4</td><td>Нұрсұлтан</td><td>9А</td><td>3</td></tr>
+<tr><td>7</td><td>Аяулым</td><td>9А</td><td>5</td></tr>
+<tr><td>10</td><td>Ерасыл</td><td>9А</td><td>4</td></tr>
+</tbody></table></div>
+<p><b>Мысал 2.</b> Бағасы 4-тен жоғары тауарларды сүзгілеу (Бағасы &gt; 1000 ₸): Рюкзак (8500), Калькулятор (4500), Флеш-жад (3200).</p>
+`,
+steps:[
+'Кестенің кез келген ұяшығын таңда.',
+'<b>Data → Filter</b> командасын орында. Баған атауларында ▼ белгісі пайда болады.',
+'Сүзгі қоятын бағанның ▼ белгісін бас.',
+'Мәтіндік сүзгі үшін қажет мәндерді белгіле немесе <b>Text Filters</b> таңда.',
+'Сандық сүзгі үшін <b>Number Filters</b> → қажет шартты (>, &lt;, =, Between) таңда.',
+'Шарт мәнін енгізіп, OK батырмасын бас.',
+'Нәтижеде тек шартқа сай жолдар қалғанын тексер.',
+'Сүзгіні алу үшін <b>Clear Filter</b> командасын қолдан.'
+],
+remember:[
+'Сүзгілеу деректерді жоймайды, тек жасырады.',
+'Сүзгі — шартқа сай жазбаларды іріктеу.',
+'Мәтіндік сүзгі: тең, құрайды, басталады.',
+'Сандық сүзгі: >, &lt;, =, Between, Top 10.',
+'Сүзгіні алу: Clear Filter.'
+],
+tasks:[
+  {
+    type:'tabletask', id:'t5a', mode:'filter',
+    title:'1-тапсырма. Қажетті оқушыларды көрсет',
+    prompt:'Кестеден тек <b>«9А» сыныбының</b> оқушыларын көрсет. «Сынып» бағанының сүзгісін қолдан.',
+    columns:DATASETS.students.columns, rows:DATASETS.students.rows,
+    controls:[{key:'cls',label:'Сынып',kind:'select'}],
+    expectedIds:[1,4,7,10],
+    explain:'9А сыныбында 4 оқушы бар: Айдана (5), Нұрсұлтан (3), Аяулым (5), Ерасыл (4). Қалған сыныптар жасырылады, бірақ кестеден жойылмайды.'
+  },
+  {
+    type:'tabletask', id:'t5b', mode:'filter',
+    title:'2-тапсырма. Шарт бойынша тауарларды ірікте',
+    prompt:'Дүкен кестесінен <b>бағасы 3000 ₸-ден жоғары</b> тауарларды ірікте. Сандық сүзгіні қолдан.',
+    columns:DATASETS.shop.columns, rows:DATASETS.shop.rows,
+    controls:[{key:'price',label:'Бағасы',kind:'num',fixedOp:'>'}],
+    expectedIds:[4,9,10],
+    explain:'Бағасы 3000 ₸-ден жоғары тауарлар: Рюкзак (8500), Калькулятор (4500), Флеш-жад (3200).'
+  }
+]
+},
+/* ------------------------------- 3.6 ----------------------------------- */
+{
+id:'t6', num:'3.6', title:'Деректерді кеңейтілген сүзгі арқылы іріктеу',
+short:'Шарттар ауқымы, AND және OR логикасы, бірнеше шарт',
+goal:'Кеңейтілген сүзгінің қарапайым сүзгіден айырмашылығын, шарттар ауқымын, AND және OR логикасын түсініп, бірнеше шартпен деректерді іріктеуді үйрену.',
+theory:`
+<h4>1. Кеңейтілген сүзгі дегеніміз не?</h4>
+<p><b>Кеңейтілген сүзгі</b> (<i>Advanced Filter</i>) — Excel-дің қуатты құралы. Ол кестедегі кірістірілген ▼ сүзгісі сияқты бір баған бойынша ғана емес, <b>бірнеше өріс</b> бойынша және <b>күрделі логикалық шарттармен</b> деректерді іріктеуге мүмкіндік береді.</p>
+
+<h4>2. Қарапайым сүзгі мен кеңейтілген сүзгінің айырмашылығы</h4>
+<div class="tablewrap">
+<table class="dtable">
+<thead><tr><th>Қарапайым сүзгі</th><th>Кеңейтілген сүзгі</th></tr></thead>
+<tbody>
+<tr><td>Кесте үстіндегі ▼ белгісі арқылы қойылады</td><td>Шарттар ауқымы арқылы қойылады</td></tr>
+<tr><td>Әр бағанға бір шарт</td><td>Бір өріске бірнеше шарт қоюға болады</td></tr>
+<tr><td>AND логикасы ғана (бағандар арасында)</td><td>AND және OR логикасын еркін қолдану</td></tr>
+<tr><td>Нәтиже сол кестеде көрінеді</td><td>Нәтижені басқа жерге көшіруге болады</td></tr>
+<tr><td>Есептелген өрнектерді қолдамайды</td><td>Есептелген шарттарды қолдайды</td></tr>
+</tbody>
+</table>
+</div>
+
+<h4>3. Шарттар ауқымы туралы түсінік</h4>
+<p><b>Шарттар ауқымы</b> (<i>Criteria Range</i>) — кестеден бөлек орналасқан кішкене аймақ. Оның бірінші жолында <b>өріс атаулары</b> (кестедегі атаулармен дәл бірдей), ал келесі жолдарда <b>шарттар</b> жазылады.</p>
+<p>Шарттар ауқымын кестенің жоғарғы жағына немесе бүйіріне орналастыруға болады. Ең бастысы — ол кестемен тікелей жалғаспауы керек (арасында кемінде бір бос жол болуы тиіс).</p>
+
+<h4>4. Бірнеше шартпен деректерді іріктеу</h4>
+<p>Шарттар ауқымында бірнеше өрістің атауын жазып, әрқайсысының астына шарт қоюға болады.</p>
+
+<h4>5. AND және OR логикасы</h4>
+<div class="callout purple">
+<b>AND (ЖӘНЕ)</b> — барлық шарт орындалуы керек. Шарттар <b>бір жолға</b> жазылады.<br><br>
+<b>OR (НЕМЕСЕ)</b> — кемінде бір шарт орындалса жеткілікті. Шарттар <b>әртүрлі жолдарға</b> жазылады.
+</div>
+<p><b>AND мысалы:</b></p>
+<div class="tablewrap"><table class="dtable">
+<thead><tr><th>Сынып</th><th>Информатика</th></tr></thead>
+<tbody><tr><td>9А</td><td>&gt;4</td></tr></tbody>
+</table></div>
+<p class="small muted">Мағынасы: сыныбы 9А <b>және</b> информатика бағасы 4-тен жоғары.</p>
+
+<p><b>OR мысалы:</b></p>
+<div class="tablewrap"><table class="dtable">
+<thead><tr><th>Сынып</th><th>Информатика</th></tr></thead>
+<tbody>
+<tr><td>9А</td><td></td></tr>
+<tr><td>9Б</td><td></td></tr>
+</tbody></table></div>
+<p class="small muted">Мағынасы: сыныбы 9А <b>немесе</b> 9Б.</p>
+
+<h4>6. Бір уақытта бірнеше өрісті пайдалану</h4>
+<p>Шарттар ауқымына үш, төрт немесе одан да көп өріс қосуға болады. Әр қосымша өріс AND логикасы бойынша бірігеді (егер бір жолда тұрса).</p>
+
+<h4>7. Іріктеу нәтижелерін тексеру</h4>
+<ul>
+<li>Шарттар ауқымындағы өріс атаулары кестедегі атаулармен дәл сәйкес пе?</li>
+<li>AND шарттары бір жолда, OR шарттары әртүрлі жолдарда жазылған ба?</li>
+<li>Нәтижедегі жазбалар саны күткенге сай ма?</li>
+<li>Шарттар ауқымы кестемен жалғасып кетпеген бе?</li>
+</ul>
+
+<h4>8. Қайталанбайтын жазбаларды таңдау</h4>
+<p>Кеңейтілген сүзгі терезесінде <b>«Unique records only»</b> (Тек бірегей жазбалар) белгісін қоюға болады. Сонда қайталанатын жазбалардың біреуі ғана қалады.</p>
+<div class="callout orange"><b>Мысалы:</b> Егер «Авторы» бағанында «Мұхтар Әуезов» екі рет кездессе, осы опция қосылғанда ол бір рет қана көрсетіледі.</div>
+`,
+examples:`
+<p><b>Мысал:</b> «9А сыныбы <b>және</b> информатика бағасы 4-тен жоғары» оқушыларды табу.</p>
+<div class="tablewrap"><table class="dtable">
+<thead><tr><th>Сынып</th><th>Информатика</th></tr></thead>
+<tbody><tr><td>9А</td><td>&gt;4</td></tr></tbody>
+</table></div>
+<p>Нәтиже: Айдана (5) және Аяулым (5). Нұрсұлтан (3) мен Ерасыл (4) шартқа сай емес.</p>
+<div class="callout"><b>Қадамдар:</b> Data → Advanced Filter → Filter the list, in-place → List range: A1:D11 → Criteria range: F1:G2 → OK.</div>
+`,
+steps:[
+'Кестеден бос орынға шарттар ауқымын дайында.',
+'Бірінші жолға кестедегі өріс атауларын дәл солай жазып шық.',
+'AND шарты үшін барлық шартты бір жолға жаз.',
+'OR шарты үшін шарттарды әртүрлі жолдарға жаз.',
+'Кестенің кез келген ұяшығын таңда.',
+'<b>Data → Advanced Filter</b> командасын аш.',
+'«Filter the list, in-place» немесе «Copy to another location» таңда.',
+'List range өрісіне кестенің ауқымын, Criteria range өрісіне шарттар ауқымын енгіз.',
+'Қажет болса, «Unique records only» белгісін қой.',
+'OK батырмасын басып, нәтижені тексер.'
+],
+remember:[
+'Кеңейтілген сүзгі — күрделі шарттарға арналған құрал.',
+'Шарттар ауқымы кестеден бөлек орналасады.',
+'AND — бір жолға, OR — әртүрлі жолдарға.',
+'Өріс атаулары кестедегімен дәл бірдей болуы керек.',
+'«Unique records only» — қайталанбайтын жазбалар.'
+],
+tasks:[
+  {
+    type:'tabletask', id:'t6a', mode:'filter',
+    title:'1-тапсырма. Екі шартпен ірікте (AND)',
+    prompt:'Кестеден <b>сыныбы «9А» ЖӘНЕ информатика бағасы 4-тен жоғары</b> оқушыларды ірікте. Екі шартты бірге қолдан.',
+    columns:DATASETS.students.columns, rows:DATASETS.students.rows,
+    controls:[
+      {key:'cls',label:'Сынып',kind:'select'},
+      {key:'inf',label:'Информатика',kind:'num',fixedOp:'>'}
+    ],
+    expectedIds:[1,7],
+    explain:'Екі шарт бірге (AND) орындалуы керек: 9А сыныбындағы және бағасы 4-тен жоғары оқушылар — Айдана (5) мен Аяулым (5). Ерасыл 9А-да, бірақ бағасы 4, сондықтан шартқа сай емес.'
+  },
+  {
+    type:'quiz', id:'t6b',
+    title:'2-тапсырма. AND немесе OR?',
+    prompt:'Әр жағдайға сәйкес логикалық шартты таңда.',
+    questions:[
+      {q:'Сыныбы «9А» және бағасы 5 болатын оқушыларды табу керек.',o:['AND','OR'],a:0,e:'Екі шарттың да орындалуы керек — AND.'},
+      {q:'Сыныбы «9А» немесе «9Б» болатын оқушыларды табу керек.',o:['AND','OR'],a:1,e:'Кемінде бір шарттың орындалуы жеткілікті — OR.'},
+      {q:'Бағасы 3-тен жоғары және 5-тен төмен оқушылар.',o:['AND','OR'],a:0,e:'Екі шарт бірге орындалуы керек — AND.'},
+      {q:'Авторы «Мұхтар Әуезов» немесе «Ілияс Есенберлин» болатын кітаптар.',o:['AND','OR'],a:1,e:'Автор екеуінің бірі болса жеткілікті — OR.'},
+      {q:'Шыққан жылы 1950-ден кейін және дана саны 5-тен кем.',o:['AND','OR'],a:0,e:'Екі шарт бірге — AND.'},
+      {q:'AND логикасында шарттар қалай жазылады?',o:['Бір жолға','Әртүрлі жолдарға','Бөлек файлға','Тек бір ұяшыққа'],a:0,e:'AND шарттары бір жолға жазылады.'},
+      {q:'OR логикасында шарттар қалай жазылады?',o:['Бір жолға','Әртүрлі жолдарға','Кестеге','Тек бір ұяшыққа'],a:1,e:'OR шарттары әртүрлі жолдарға жазылады.'}
+    ]
+  }
+]
+},
+/* ------------------------------ 3.7–3.8 --------------------------------- */
+{
+id:'t7', num:'3.7–3.8', title:'Деректер базасымен жұмыс істеу: мини-жоба',
+short:'Жобалық жұмыс, кесте құру, іздеу, сұрыптау, сүзгілеу',
+goal:'Алған білімді қорытындылап, өз деректер базасын құру, онда іздеу, сұрыптау, сүзгілеу және кеңейтілген сүзгіні қолдану дағдыларын қалыптастыру.',
+theory:`
+<h4>1. Жобалық жұмыстың мақсаты</h4>
+<p>Осы тарауда біз деректер базасының негіздерін, Excel-де кесте құруды, іздеуді, сұрыптауды, сүзгілеуді және кеңейтілген сүзгіні үйрендік. Енді осы білімді тәжірибеде біріктіріп, <b>мини-жоба</b> орындаймыз.</p>
+
+<h4>2. Жоба тақырыптары</h4>
+<ol>
+<li>Мектеп кітапханасының деректер базасы.</li>
+<li>Спорт үйірмелерінің қатысушылары.</li>
+<li>Дүкен тауарларының тізімі.</li>
+<li>Сынып оқушыларының үлгі деректер базасы.</li>
+<li>Мектептегі іс-шаралар кестесі.</li>
+</ol>
+
+<h4>3. Жобаның кезеңдері</h4>
+<ol class="steps">
+<li><b>Жоба тақырыбын таңдау.</b> Қай деректер базасын құратыныңды анықта.</li>
+<li><b>Мақсатты анықтау.</b> Бұл база кімге және не үшін қажет?</li>
+<li><b>Өрістерді таңдау.</b> Объектінің қандай қасиеттері сақталады?</li>
+<li><b>Үлгі деректер енгізу.</b> Кемінде 5–10 жазба толтыр.</li>
+<li><b>Деректерді іздеу.</b> Кемінде бір іздеу жүргіз.</li>
+<li><b>Сұрыптау.</b> Кемінде бір баған бойынша сұрыпта.</li>
+<li><b>Сүзгілеу.</b> Бір шарт бойынша сүзгі қолдан.</li>
+<li><b>Кеңейтілген сүзгі.</b> Екі шартты AND/OR арқылы қолдан.</li>
+<li><b>Нәтижені талдау.</b> Алынған нәтижелерді түсіндір.</li>
+<li><b>Қорытынды жасау.</b> Не үйрендің, қандай қиындық болды?</li>
+</ol>
+
+<h4>4. Бағалау критерийлері</h4>
+<div class="tablewrap"><table class="dtable">
+<thead><tr><th>Критерий</th><th>Салмағы</th></tr></thead>
+<tbody>
+<tr><td>Кесте құрылымы (өріс атаулары, типтер, ID)</td><td>20%</td></tr>
+<tr><td>Деректердің дұрыстығы (бос жоқ, қайталанбайды)</td><td>20%</td></tr>
+<tr><td>Іздеу</td><td>15%</td></tr>
+<tr><td>Сұрыптау</td><td>15%</td></tr>
+<tr><td>Сүзгілеу (қарапайым + кеңейтілген)</td><td>15%</td></tr>
+<tr><td>Қорытынды және рәсімдеу</td><td>15%</td></tr>
+</tbody></table></div>
+
+<h4>5. Нәтижені рәсімдеу</h4>
+<ul>
+<li>Кестенің атауын және мақсатын жаз.</li>
+<li>Өріс атауларын қою қаріппен ерекшеле.</li>
+<li>Кестеге шекаралар қой.</li>
+<li>Орындалған әрекеттерді (іздеу, сұрыптау, сүзгілеу) қысқаша сипатта.</li>
+<li>Қорытынды бөлімде не үйренгеніңді жаз.</li>
+</ul>
+<div class="callout purple"><b>Кеңес:</b> Жобаны «Мини-жоба» бөліміндегі интерактивті конструкторда онлайн орындап, бағасын бірден көре аласың.</div>
+`,
+examples:`
+<p><b>Жоба мысалы: «Мектеп кітапханасы»</b></p>
+<ul>
+<li><b>Мақсаты:</b> Кітапханадағы кітаптарды есепке алу және оқырманға жылдам ақпарат беру.</li>
+<li><b>Өрістері:</b> ID, Кітап атауы, Авторы, Шыққан жылы, Жанры, Дана саны.</li>
+<li><b>Іздеу:</b> «Әуезов» — 2 кітап табылды.</li>
+<li><b>Сұрыптау:</b> Шыққан жылы бойынша өсу — ең ескі кітап «Қарлығаштың құйрығы неге айыр?» (1879).</li>
+<li><b>Сүзгілеу:</b> Жанры = «Роман» — 4 кітап.</li>
+<li><b>Кеңейтілген сүзгі:</b> Авторы «Мұхтар Әуезов» ЖӘНЕ Шыққан жылы &gt; 1935 — «Абай жолы» (1942).</li>
+</ul>
+`,
+steps:[
+'Жоба тақырыбын таңда.',
+'Деректер базасының мақсатын бір сөйлеммен жаз.',
+'Өрістерді анықта (кемінде 4 өріс).',
+'Кемінде 5 жазба енгіз.',
+'Іздеу жүргізіп, нәтижені жаз.',
+'Бір баған бойынша сұрыпта.',
+'Бір шарт бойынша сүзгі қолдан.',
+'Екі шартты кеңейтілген сүзгімен қолдан.',
+'Нәтижені талдап, қорытынды жаз.',
+'Бағалау критерийлері бойынша өз жұмысынды тексер.'
+],
+remember:[
+'Жоба — алған білімді тәжірибеде қолдану.',
+'Кесте құрылымы — жобаның негізі.',
+'Іздеу, сұрыптау, сүзгілеу — міндетті кезеңдер.',
+'Кеңейтілген сүзгі күрделі шарттарды шешеді.',
+'Қорытынды жасау — жобаның соңғы кезеңі.'
+],
+tasks:[
+  {
+    type:'link', id:'t7a',
+    title:'1-тапсырма. Мини-жобаны орында',
+    prompt:'«Мини-жоба» бөліміне өтіп, өз деректер базаңды құр. Жоба конструкторында кесте құрылымын жаса, іздеу, сұрыптау және сүзгілеу кезеңдерін орында.',
+    linkText:'Мини-жобаға өту →', linkRoute:'project',
+    explain:'Жоба конструкторында 5 тақырыптың бірін таңдап, өрістерді анықтайсың, деректер енгізесің және барлық кезеңдерді орындайсың. Соңында 100 балдық жүйемен баға аласың.'
+  },
+  {
+    type:'quiz', id:'t7b',
+    title:'2-тапсырма. Жоба кезеңдерін тексер',
+    prompt:'Жоба кезеңдеріне қатысты сұрақтарға жауап бер.',
+    questions:[
+      {q:'Жобаның бірінші кезеңі қандай?',o:['Тақырып пен мақсатты анықтау','Деректерді сүзгілеу','Кестені форматтау','Қорытынды жазу'],a:0,e:'Алдымен тақырып пен мақсат анықталады.'},
+      {q:'Өрістерді таңдау кезінде ең басты не ескеріледі?',o:['Әр өріс бір типтегі деректі сақтайтыны','Өрістер мүмкіндігінше көп болуы','Өрістер ағылшын тілінде болуы','Өріс атауы ұзын болуы'],a:0,e:'Әр өріс бір типтегі деректі сақтауы керек.'},
+      {q:'Жобада кемінде қанша жазба болғаны дұрыс?',o:['1','5–10','100','1000'],a:1,e:'Кемінде 5–10 жазба болғаны жұмысты тексеруге жеткілікті.'},
+      {q:'Бағалау критерийлерінде ең үлкен салмақ неге берілген?',o:['Кесте құрылымы мен деректердің дұрыстығына','Түстерге','Қаріп өлшеміне','Файл атауына'],a:0,e:'Кесте құрылымы (20%) және деректердің дұрыстығы (20%) — ең үлкен салмақ.'},
+      {q:'Жобаның соңғы кезеңі қандай?',o:['Қорытынды жасау','Іздеу','Сүзгілеу','Кесте құру'],a:0,e:'Соңында нәтиже талданып, қорытынды жазылады.'}
+    ]
+  }
+]
+}
+];
+
+/* =========================================================================
+   TESTS (7 × 10 = 70 questions)
+   ========================================================================= */
+const TESTS = {
+t1:[
+{q:'Деректер базасы дегеніміз не?',o:['Өзара байланысқан, белгілі бір ереже бойынша ұйымдастырылған деректер жиынтығы','Кез келген суреттер мен бейнелер жинағы','Компьютердегі барлық файлдар тізімі','Мәтіндік құжаттағы абзацтар'],a:0,e:'Деректер базасы — ереже бойынша ұйымдастырылған, өзара байланысқан деректер жиынтығы.'},
+{q:'Деректер базасының кестесіндегі баған қалай аталады?',o:['Жазба','Өріс','Ұяшық','Кілт'],a:1,e:'Кестенің бағаны — өріс.'},
+{q:'Кестедегі бір жол қалай аталады?',o:['Өріс','Жазба','Баған','Индекс'],a:1,e:'Бір жол — бір жазба, ол бір объект туралы толық ақпаратты қамтиды.'},
+{q:'Кестеде өріс атаулары қай жерде орналасады?',o:['Бірінші жолда','Соңғы жолда','Бірінші бағанда','Кестеден тыс'],a:0,e:'Өріс атаулары кестенің бірінші жолында жазылады.'},
+{q:'Бірегей идентификатор дегеніміз не?',o:['Әр жазбаны басқаларынан ажырататын, қайталанбайтын өріс','Кестенің ең үлкен бағаны','Кестедегі бос жол','Деректердің жалпы саны'],a:0,e:'Бірегей идентификатор (мысалы ID) әр жазбаны бірмәнді анықтайды.'},
+{q:'Қайсысы деректер базасына мысал бола алады?',o:['Мектеп кітапханасының кітаптар тізімі','Әңгіме мәтіні','Сурет файлы','Музыкалық әуен'],a:0,e:'Кітаптар тізімі — құрылымдалған деректер жиынтығы.'},
+{q:'Бір бағанда қандай деректер болуы керек?',o:['Бір типтегі деректер','Кез келген аралас деректер','Тек мәтіндік деректер','Тек суреттер'],a:0,e:'Әр бағанда бір типтегі ақпарат қана болуы керек.'},
+{q:'Кестеде 5 жазба және 4 өріс бар. Барлығы неше ұяшық бар?',o:['9','20','16','25'],a:1,e:'5 × 4 = 20 ұяшық.'},
+{q:'Қайсысы деректер базасын ұйымдастыру ережесіне САЙ ЕМЕС?',o:['Кесте ішінде бос жолдар қалдыру','Бірінші жолға өріс атауларын жазу','Әр жазбаны жеке жолға жазу','Әр бағанға бір типтегі деректерді енгізу'],a:0,e:'Бос жолдар сүзгілеу мен сұрыптау кезінде қателікке әкеледі.'},
+{q:'«Оқушылар» кестесінде бірегей идентификатор ретінде қай өріс қолайлы?',o:['Оқушының аты','ID нөмірі','Сыныбы','Бағасы'],a:1,e:'Аты қайталануы мүмкін, ID қайталанбайды.'}
+],
+t2:[
+{q:'Excel-де деректер базасын құру қай жолдан басталуы керек?',o:['Бірінші жолға баған атауларын жазу','Бірден деректерді жазу','Бос жол қалдыру','Диаграмма салу'],a:0,e:'Бірінші жол — баған атаулары.'},
+{q:'Бір бағанда әртүрлі типтегі деректер араласып кетсе не болады?',o:['Сүзгілеу мен сұрыптау қате жұмыс істейді','Ештеңе өзгермейді','Excel қатені өзі түзейді','Кесте жылдамдайды'],a:0,e:'Аралас типтер сүзгілеу мен сұрыптау нәтижесін бұрмалайды.'},
+{q:'Баған атаулары қандай болуы керек?',o:['Қысқа, нақты, қайталанбайтын','Өте ұзын және толық сипаттамалы','Барлығы бірдей','Тек сандардан тұратын'],a:0,e:'Атаулар қысқа, нақты және қайталанбауы керек.'},
+{q:'Кестеде бос жолдар болса, сүзгілеуге қалай әсер етеді?',o:['Сүзгілеу нәтижесі бұрмаланады','Сүзгі жылдамдайды','Ештеңе болмайды','Excel қате береді'],a:0,e:'Excel бос жолды кестенің соңы деп қабылдауы мүмкін.'},
+{q:'«Шыққан жылы» өрісіне қандай деректер енгізіледі?',o:['Сандар','Мәтін','Суреттер','Формулалар міндетті түрде'],a:0,e:'Жыл — сандық дерек.'},
+{q:'Кестенің бірінші жолын қалай форматтау дұрыс?',o:['Қою қаріп және фон түсімен ерекшелеу','Кіші әріптермен жазу','Ақ түспен жазу','Форматтаудың қажеті жоқ'],a:0,e:'Атауларды ерекшелеу кестені оқуға ыңғайлы етеді.'},
+{q:'Қайсысы дұрыс құрылмаған деректер базасының белгісі?',o:['Бір бағанда «9А» мәтіні мен «Айдана» аты аралас','Барлық өріс атауы бірінші жолда','ID өрісі қайталанбайды','Барлық жазба жеке жолда'],a:0,e:'Бір бағанда әртүрлі типтегі деректер болмауы керек.'},
+{q:'Неге баған атаулары қайталанбауы керек?',o:['Сүзгілеу мен сұрыптау кезінде шатасу туады','Кесте үлкейіп кетеді','Excel істемей қалады','Баған жоғалады'],a:0,e:'Қайталанған атаулар Excel-ге қай бағанды таңдау керегін анықтауға кедергі жасайды.'},
+{q:'Кестені деректер базасы ретінде пайдалану үшін не істеу керек?',o:['Баған атауларын бөлек жолға жазу, әр жазбаны жеке жолға орналастыру','Барлық деректерді бір ұяшыққа жазу','Тек сандарды жазу','Кестені суретке айналдыру'],a:0,e:'Дұрыс құрылым — деректер базасының негізі.'},
+{q:'Қайталанатын жазбалар табылса, не істеу керек?',o:['Жою керек','Қалдыра беруге болады','Көшіріп көбейту керек','Басқа бағанға көшіру керек'],a:0,e:'Қайталанатын жазбалар статистиканы бұрмалайды, сондықтан жойылады.'}
+],
+t3:[
+{q:'Excel-де іздеу терезесін қай пернелер тіркесімі ашады?',o:['Ctrl + F','Ctrl + P','Ctrl + S','Ctrl + Z'],a:0,e:'Ctrl + F — іздеу.'},
+{q:'Іздеудің мақсаты неде?',o:['Кестеден қажетті ақпаратты жылдам табу','Деректерді жою','Кестені бояу','Бағанды өшіру'],a:0,e:'Іздеу — қажет ақпаратты жылдам табу тәсілі.'},
+{q:'Іздеу мен сүзгінің айырмашылығы неде?',o:['Іздеу мәнді табады, сүзгі шартқа сай емес жолдарды жасырады','Екеуі бірдей','Іздеу деректерді жояды','Сүзгі деректерді жояды'],a:0,e:'Іздеу тек тауып көрсетеді, сүзгі жолдарды жасырады.'},
+{q:'Іздеу нәтижесі табылмаса не болады?',o:['«Табылмады» деген хабарлама шығады','Excel жабылады','Кесте жойылады','Барлық деректер өзгереді'],a:0,e:'Excel нәтиже табылмағанын хабарлайды.'},
+{q:'Бірнеше шартқа сай ақпаратты табу үшін не қолданылады?',o:['Сүзгілеу немесе кеңейтілген сүзгі','Тек Ctrl+F','Тек көзбен қарау','Кестені басып шығару'],a:0,e:'Бірнеше шарт үшін сүзгі қажет.'},
+{q:'Іздеу жолағына «Әуезов» деп жазсақ, нәтижеде не шығады?',o:['Мұхтар Әуезовтің кітаптары','Барлық кітаптар','Тек 1942 жылғы кітап','Ештеңе шықпайды'],a:0,e:'Автор аты бойынша іздеу сол автордың жазбаларын табады.'},
+{q:'Excel іздеуі үлкен-кіші әріпті ажырата ма?',o:['Әдетте ажыратпайды','Әрқашан ажыратады','Тек сандарда ажыратады','Тек қазақ әріптерінде ажыратады'],a:0,e:'Excel іздеуі әдетте регистрді ескермейді.'},
+{q:'«Find All» батырмасы не істейді?',o:['Барлық сәйкес нәтижені тізім етіп көрсетеді','Бірінші нәтижені ғана көрсетеді','Іздеуді тоқтатады','Кестені сақтайды'],a:0,e:'Find All — барлық кездесуді көрсетеді.'},
+{q:'Іздеу нәтижесін талдау дегеніміз не?',o:['Табылған жазбалардың дұрыс әрі қажет екенін тексеру','Іздеуді қайта бастау','Кестені жою','Бағандарды ауыстыру'],a:0,e:'Нәтижені тексеру — іздеудің маңызды кезеңі.'},
+{q:'Үлкен кестеде (500 жазба) қажет жазбаны табудың ең тиімді жолы қандай?',o:['Іздеу жолағын пайдалану','Көзбен шолып шығу','Кестені қайта жазу','Барлығын басып шығару'],a:0,e:'Іздеу жолағы ең жылдам әдіс.'}
+],
+t4:[
+{q:'Сұрыптау дегеніміз не?',o:['Деректерді белгілі бір өріс бойынша тәртіпке келтіру','Деректерді жою','Деректерді жасыру','Деректерді көшіру'],a:0,e:'Сұрыптау — жолдардың орнын өріс бойынша өзгерту.'},
+{q:'Сандарды өсу ретімен сұрыптау дегеніміз?',o:['Кішіден үлкенге','Үлкеннен кішіге','Әліпби бойынша','Кездейсоқ ретпен'],a:0,e:'Өсу реті — кішіден үлкенге.'},
+{q:'Сандарды кему ретімен сұрыптау дегеніміз?',o:['Үлкеннен кішіге','Кішіден үлкенге','Әліпби бойынша','Күн бойынша'],a:0,e:'Кему реті — үлкеннен кішіге.'},
+{q:'«Аружан, Данияр, Нұрсұлтан» есімдерін әліпби бойынша өсу ретімен орналастыр.',o:['Аружан, Данияр, Нұрсұлтан','Нұрсұлтан, Данияр, Аружан','Данияр, Аружан, Нұрсұлтан','Нұрсұлтан, Аружан, Данияр'],a:0,e:'Қазақ әліпбиінде А, Д, Н әріптері осы ретпен келеді.'},
+{q:'Сұрыптау кезінде жолдың басқа ұяшықтары қалай болады?',o:['Бірге жылжиды','Орнында қалады','Жойылады','Бос болады'],a:0,e:'Сұрыптау кезінде бүкіл жазба бірге жылжиды.'},
+{q:'Күн бойынша сұрыптау қандай ретпен жүреді?',o:['Хронологиялық ретпен','Әліпби бойынша','Кездейсоқ','Кему ретімен ғана'],a:0,e:'Күндер хронологиялық ретпен орналасады.'},
+{q:'Бірнеше өріс бойынша сұрыптау қалай жүреді?',o:['Алдымен бірінші өріс, мәндері тең болса екіншісі','Барлық өріс бір уақытта','Тек соңғы өріс бойынша','Тек бірінші баған бойынша'],a:0,e:'Көп деңгейлі сұрыптау осылай жұмыс істейді.'},
+{q:'Сұрыптау мен сүзгілеудің айырмашылығы неде?',o:['Сұрыптау ретті өзгертеді, сүзгі жолдарды жасырады','Екеуі бірдей','Сұрыптау жолдарды жасырады','Сүзгі ретті өзгертеді'],a:0,e:'Сұрыптау — реттейді, сүзгі — іріктейді.'},
+{q:'Тек бір бағанды сұрыптаса не болады?',o:['Жолдар арасындағы байланыс бұзылады','Ештеңе болмайды','Кесте жылдамдайды','Барлық деректер жойылады'],a:0,e:'Тек бір бағанды сұрыптау жазбалардың байланысын бұзады.'},
+{q:'5, 3, 8, 1 сандарын өсу ретімен сұрыптау нәтижесі қандай?',o:['1, 3, 5, 8','8, 5, 3, 1','5, 3, 8, 1','3, 1, 5, 8'],a:0,e:'Өсу реті: 1, 3, 5, 8.'}
+],
+t5:[
+{q:'Сүзгілеу дегеніміз не?',o:['Шартқа сәйкес жолдарды ғана көрсету','Деректерді жою','Деректерді сұрыптау','Кестені көшіру'],a:0,e:'Сүзгілеу — шартқа сай жазбаларды іріктеп көрсету.'},
+{q:'Сүзгі қойғанда сәйкес емес жолдар не болады?',o:['Жасырылады, бірақ жойылмайды','Толығымен жойылады','Басқа бетке көшеді','Қызыл түске боялады'],a:0,e:'Сүзгілеу деректерді жоймайды, тек жасырады.'},
+{q:'Тек 9А сыныбын көрсету үшін қай бағанға сүзгі қою керек?',o:['Сынып','Оқушы','ID','Информатика'],a:0,e:'Сынып бағанына сүзгі қойылады.'},
+{q:'«Бағасы 4-тен жоғары» деген қандай сүзгі түрі?',o:['Сандық сүзгі','Мәтіндік сүзгі','Күн сүзгісі','Түс сүзгісі'],a:0,e:'Сандарға қойылатын шарт — сандық сүзгі.'},
+{q:'Сүзгіні алу үшін қандай команда қолданылады?',o:['Clear Filter','Delete Row','Save As','Insert Column'],a:0,e:'Clear Filter сүзгіні алып, барлық жазбаны қайта көрсетеді.'},
+{q:'Сүзгілеу деректерді жоя ма?',o:['Жоқ, тек жасырады','Иә, жояды','Кейде жояды','Тек сандарды жояды'],a:0,e:'Сүзгілеу деректерді өзгертпейді.'},
+{q:'Мәтіндік сүзгінің мысалы қайсы?',o:['Contains (құрайды)','Greater Than (>)','Between','Top 10'],a:0,e:'Contains — мәтіндік сүзгі опциясы.'},
+{q:'Сүзгі мен сұрыптауды бір уақытта қолдануға бола ма?',o:['Иә, болады','Жоқ, болмайды','Тек Excel 2010-да','Тек сандар үшін'],a:0,e:'Сүзгі мен сұрыптауды бірге қолдануға болады.'},
+{q:'Бір бағанға бірнеше шарт қою үшін не қолданылады?',o:['Арнайы сүзгі (Custom Filter) немесе қосымша шарттар','Тек бір шарт қоюға болады','Кестені жою','Бағанды жасыру'],a:0,e:'Custom Filter арқылы бір бағанға бірнеше шарт қоюға болады.'},
+{q:'Excel-де сүзгіленген жазбалар санын қайдан көруге болады?',o:['Төменгі сол жақтағы статус жолағынан','Тек басып шығарғанда','Қағаздан','Көрінбейді'],a:0,e:'Status bar сүзгіленген жазбалар санын көрсетеді.'}
+],
+t6:[
+{q:'Кеңейтілген сүзгі дегеніміз не?',o:['Шарттар ауқымын пайдаланатын, күрделі шарттарға арналған сүзгі','Қарапайым сүзгінің басқа атауы','Деректерді жоятын құрал','Диаграмма салу құралы'],a:0,e:'Кеңейтілген сүзгі шарттар ауқымы арқылы күрделі шарттарды шешеді.'},
+{q:'Шарттар ауқымы қайда орналасады?',o:['Кестеден бөлек, жоғары немесе бүйірде','Кестенің ішінде','Басқа файлда','Тек бірінші ұяшықта'],a:0,e:'Шарттар ауқымы кестеден бөлек орналасады.'},
+{q:'AND логикасы нені білдіреді?',o:['Барлық шарттың орындалуы','Кемінде бір шарттың орындалуы','Шарттардың орындалмауы','Тек бірінші шарттың орындалуы'],a:0,e:'AND — барлық шарт орындалуы керек.'},
+{q:'OR логикасы нені білдіреді?',o:['Кемінде бір шарттың орындалуы','Барлық шарттың орындалуы','Ешбір шарттың орындалмауы','Тек соңғы шарт'],a:0,e:'OR — кемінде бір шарт жеткілікті.'},
+{q:'AND шарттары шарттар ауқымында қалай жазылады?',o:['Бір жолға','Әртүрлі жолдарға','Бір ұяшыққа қосарлап','Кестенің соңына'],a:0,e:'AND шарттары бір жолға жазылады.'},
+{q:'OR шарттары қалай жазылады?',o:['Әртүрлі жолдарға','Бір жолға','Бір ұяшыққа','Кестеден тыс жерге'],a:0,e:'OR шарттары әртүрлі жолдарға жазылады.'},
+{q:'«9А ЖӘНЕ бағасы 4-тен жоғары» қандай логикаға жатады?',o:['AND','OR','NOR','XOR'],a:0,e:'Екі шарт бірге орындалуы керек — AND.'},
+{q:'«9А НЕМЕСЕ 9Б» қандай логикаға жатады?',o:['OR','AND','NOR','XOR'],a:0,e:'Екі сыныптың бірі болса жеткілікті — OR.'},
+{q:'Қарапайым сүзгі мен кеңейтілген сүзгінің негізгі айырмашылығы неде?',o:['Кеңейтілген сүзгі күрделі, көп шартты логиканы қолдайды','Кеңейтілген сүзгі жылдамырақ','Қарапайым сүзгі деректерді жояды','Айырмашылық жоқ'],a:0,e:'Кеңейтілген сүзгі күрделі шарттарды шешеді.'},
+{q:'«Unique records only» опциясы не істейді?',o:['Қайталанбайтын жазбаларды ғана қалдырады','Барлық жазбаны жояды','Деректерді сұрыптайды','Кестені бояйды'],a:0,e:'Бұл опция қайталанатын жазбалардың біреуін ғана қалдырады.'}
+],
+t7:[
+{q:'Мини-жобаның бірінші кезеңі қандай?',o:['Тақырып пен мақсатты анықтау','Сүзгілеу','Сұрыптау','Қорытынды жазу'],a:0,e:'Алдымен тақырып пен мақсат анықталады.'},
+{q:'Жоба үшін өрістерді таңдағанда не ескеріледі?',o:['Әр өріс бір типтегі деректі сақтайтыны','Өрістер мүмкіндігінше көп болуы','Өрістер ағылшынша болуы','Өрістер қысқа болмауы'],a:0,e:'Әр өріс бір типтегі деректі сақтауы керек.'},
+{q:'Үлгі деректер не үшін қажет?',o:['Кестені тексеру және жұмысын көрсету үшін','Файл көлемін үлкейту үшін','Уақытты өткізу үшін','Диаграмма салу үшін'],a:0,e:'Үлгі деректер арқылы іздеу, сұрыптау, сүзгілеуді тексереміз.'},
+{q:'Жобада кемінде қанша жазба болғаны дұрыс?',o:['5–10','1','50','100'],a:0,e:'5–10 жазба жұмысты тексеруге жеткілікті.'},
+{q:'Жоба бағалауында «Кесте құрылымы» қанша пайыз?',o:['20%','5%','50%','40%'],a:0,e:'Кесте құрылымы — 20%.'},
+{q:'Жоба бағалауында «Іздеу» қанша пайыз?',o:['15%','30%','5%','25%'],a:0,e:'Іздеу — 15%.'},
+{q:'Жоба бағалауында «Сүзгілеу» қанша пайыз?',o:['15%','40%','10%','25%'],a:0,e:'Сүзгілеу — 15%.'},
+{q:'Жобаның қорытынды бөлімінде не жазылады?',o:['Не үйренгені, қандай нәтиже алғаны','Барлық деректер қайтадан','Кесте формулалары','Бос бет'],a:0,e:'Қорытындыда нәтиже мен түйін жазылады.'},
+{q:'Жобада кеңейтілген сүзгі не үшін қолданылады?',o:['Екі немесе одан да көп шартты бірге қолдану үшін','Кестені бояу үшін','Деректерді жою үшін','Файлды сақтау үшін'],a:0,e:'Кеңейтілген сүзгі күрделі шарттарды шешеді.'},
+{q:'Жоба нәтижесін талдау дегеніміз не?',o:['Алынған нәтижелердің дұрыстығын тексеру және түсіндіру','Кестені жою','Жобаны қайта бастау','Деректерді өшіру'],a:0,e:'Талдау — нәтижені тексеру және түсіндіру.'}
+]
+};
+
+/* ------------------------- FINAL TEST (30) ------------------------------- */
+const FINAL_TEST = [
+{q:'Деректер базасының негізгі құрылымдық бірлігі қандай?',o:['Кесте','Диаграмма','Сурет','Мәтін'],a:0,e:'Деректер базасы кестелерден тұрады.'},
+{q:'Кестенің бағаны қалай аталады?',o:['Өріс','Жазба','Кілт','Индекс'],a:0,e:'Баған — өріс.'},
+{q:'Кестенің жолы қалай аталады?',o:['Жазба','Өріс','Баған','Формула'],a:0,e:'Жол — жазба.'},
+{q:'Бірегей идентификатордың қасиеті қандай?',o:['Қайталанбайды','Әрқашан мәтін','Әрқашан бос','Тек әріптерден тұрады'],a:0,e:'Ол әр жазбаны ажыратады, сондықтан қайталанбайды.'},
+{q:'Кестеде 6 жазба және 5 өріс бар. Барлығы неше ұяшық?',o:['30','11','25','36'],a:0,e:'6 × 5 = 30.'},
+{q:'Excel-де деректер базасының баған атаулары қай жолда болады?',o:['Бірінші жолда','Екінші жолда','Соңғы жолда','Болмайды'],a:0,e:'Бірінші жол — баған атаулары.'},
+{q:'Бір бағанда әртүрлі типтегі деректер болса...',o:['Сүзгілеу мен сұрыптау қате жұмыс істейді','Бәрі дұрыс болады','Excel автоматты түзейді','Кесте жылдамдайды'],a:0,e:'Типтер араласуы анализді бұзады.'},
+{q:'Кесте ішіндегі бос жолдар неге зиянды?',o:['Excel оны кестенің соңы деп қабылдауы мүмкін','Кесте үлкейеді','Түсі өзгереді','Баған жоғалады'],a:0,e:'Бос жол кестенің шекарасын бұзады.'},
+{q:'Қайталанатын жазбалар қалай жойылады?',o:['Data → Remove Duplicates','Ctrl + P','Insert → Chart','File → Print'],a:0,e:'Remove Duplicates қайталанатын жазбаларды жояды.'},
+{q:'Excel-де іздеу терезесін қай тіркесім ашады?',o:['Ctrl + F','Ctrl + C','Ctrl + V','Ctrl + N'],a:0,e:'Ctrl + F — іздеу.'},
+{q:'Іздеу мен сүзгінің айырмашылығы неде?',o:['Іздеу табады, сүзгі жолдарды жасырады','Екеуі бірдей','Сүзгі деректерді жояды','Іздеу сұрыптайды'],a:0,e:'Іздеу — табу, сүзгі — іріктеу.'},
+{q:'Іздеу барысында үлкен-кіші әріп ескеріле ме?',o:['Әдетте ескерілмейді','Әрқашан ескеріледі','Тек қазақ әріптерінде','Тек сандарда'],a:0,e:'Excel әдетте регистрді ескермейді.'},
+{q:'Сұрыптау дегеніміз не?',o:['Жолдарды белгілі бір ретпен орналастыру','Жолдарды жасыру','Деректерді жою','Кестені көшіру'],a:0,e:'Сұрыптау — тәртіпке келтіру.'},
+{q:'Кему ретімен сұрыптау дегеніміз?',o:['Үлкеннен кішіге','Кішіден үлкенге','Әліпби бойынша','Кездейсоқ'],a:0,e:'Кему — үлкеннен кішіге.'},
+{q:'Тек бір бағанды сұрыптау неге дұрыс емес?',o:['Жолдар арасындағы байланыс бұзылады','Кесте жоғалады','Excel істемейді','Уақыт көп кетеді'],a:0,e:'Бүкіл жазба бірге жылжуы керек.'},
+{q:'Көп деңгейлі сұрыптау қалай жасалады?',o:['Data → Sort → Add Level','Ctrl + F','Insert → Table','File → Save'],a:0,e:'Add Level арқылы қосымша өріс қосылады.'},
+{q:'Сүзгілеу деректерді жоя ма?',o:['Жоқ, тек жасырады','Иә','Кейде','Тек сандарды'],a:0,e:'Сүзгі деректерді өзгертпейді.'},
+{q:'«Бағасы 5000-нан жоғары» қандай сүзгі?',o:['Сандық сүзгі','Мәтіндік сүзгі','Күн сүзгісі','Түс сүзгісі'],a:0,e:'Сандық шарт — сандық сүзгі.'},
+{q:'Сүзгіні алу командасы қандай?',o:['Clear Filter','Delete','Sort A-Z','Freeze Panes'],a:0,e:'Clear Filter сүзгіні алады.'},
+{q:'Мәтіндік сүзгі опциясын көрсет.',o:['Begins With','Greater Than','Top 10','Between'],a:0,e:'Begins With — мәтіндік сүзгі.'},
+{q:'Кеңейтілген сүзгі қандай құралды пайдаланады?',o:['Шарттар ауқымын','Диаграмманы','Суретті','Hyperlink-ті'],a:0,e:'Кеңейтілген сүзгі шарттар ауқымына сүйенеді.'},
+{q:'AND логикасы нені талап етеді?',o:['Барлық шарттың орындалуын','Кемінде бір шарттың орындалуын','Ешбір шарттың орындалмауын','Тек соңғы шартты'],a:0,e:'AND — барлық шарт.'},
+{q:'OR логикасы нені талап етеді?',o:['Кемінде бір шарттың орындалуын','Барлық шарттың орындалуын','Ешбір шарттың орындалмауын','Тек бірінші шартты'],a:0,e:'OR — кемінде бір шарт.'},
+{q:'AND шарттары қалай жазылады?',o:['Бір жолға','Әртүрлі жолдарға','Бір ұяшыққа','Кесте сыртына'],a:0,e:'AND — бір жол.'},
+{q:'OR шарттары қалай жазылады?',o:['Әртүрлі жолдарға','Бір жолға','Бір ұяшыққа','Бір бағанға'],a:0,e:'OR — әртүрлі жолдар.'},
+{q:'«Unique records only» опциясы не істейді?',o:['Қайталанбайтын жазбаларды қалдырады','Барлығын жояды','Сұрыптайды','Бояйды'],a:0,e:'Қайталанатын жазбалардың біреуі ғана қалады.'},
+{q:'Мини-жобаның бірінші кезеңі қандай?',o:['Тақырып пен мақсатты анықтау','Сүзгілеу','Сұрыптау','Рәсімдеу'],a:0,e:'Алдымен тақырып пен мақсат.'},
+{q:'Жоба бағалауында «Деректердің дұрыстығы» қанша пайыз?',o:['20%','10%','40%','5%'],a:0,e:'Деректердің дұрыстығы — 20%.'},
+{q:'Деректер базасын ұйымдастыру ережесіне сай келетін жағдайды таңда.',o:['Бірінші жол — атаулар, әр бағанда бір типті деректер','Бір бағанда сан мен мәтін аралас','Кестенің ортасында бос жол бар','Барлық деректер бір ұяшықта'],a:0,e:'Бұл — дұрыс ұйымдастырылған кесте.'}
+];
+
+/* =========================================================================
+   QUIZ REGISTRY & RENDER
+   ========================================================================= */
+const QUIZZES = {};
+
+function registerQuizzes(){
+  TOPICS.forEach(t=>{
+    QUIZZES['test-'+t.id] = {questions:TESTS[t.id], title:t.num+' · '+t.title, kind:'topic', topicId:t.id};
+    (t.tasks||[]).forEach(task=>{
+      if(task.type === 'quiz'){
+        QUIZZES['task-'+task.id] = {questions:task.questions, title:task.title, kind:'task'};
+      }
+    });
+  });
+  QUIZZES['final'] = {questions:FINAL_TEST, title:'III бөлім бойынша қорытынды тест', kind:'final'};
+}
+
+function quizHTML(questions, qid){
+  return `<div class="quiz" data-quiz="${qid}">
+    ${questions.map((q,i)=>`
+      <div class="q" data-qidx="${i}">
+        <div class="q-head"><span class="q-num">${i+1}</span><span>${q.q}</span></div>
+        <div class="q-opts">
+          ${q.o.map((o,j)=>`<label class="opt" data-opt="${j}">
+            <input type="radio" name="${qid}-${i}" value="${j}">
+            <span>${o}</span>
+          </label>`).join('')}
+        </div>
+      </div>`).join('')}
+    <div class="quiz-actions">
+      <button class="btn primary" data-action="quiz-submit" data-quiz="${qid}">Тесті аяқтау</button>
+      <button class="btn ghost" data-action="quiz-reset" data-quiz="${qid}">Қайта тапсыру</button>
+    </div>
+    <div class="quiz-result" id="res-${qid}"></div>
+  </div>`;
+}
+
+function submitQuiz(qid){
+  const quiz = QUIZZES[qid];
+  if(!quiz) return;
+  const root = document.querySelector(`.quiz[data-quiz="${qid}"]`);
+  if(!root) return;
+  const answers = [];
+  let unanswered = 0;
+  quiz.questions.forEach((q,i)=>{
+    const sel = root.querySelector(`input[name="${qid}-${i}"]:checked`);
+    if(!sel) unanswered++;
+    answers.push(sel ? Number(sel.value) : -1);
+  });
+  if(unanswered > 0 && !confirm(`${unanswered} сұраққа жауап берілмеді. Тесті аяқтайсыз ба?`)) return;
+
+  let correct = 0;
+  const wrong = [];
+  quiz.questions.forEach((q,i)=>{
+    const ok = answers[i] === q.a;
+    if(ok) correct++; else wrong.push({i, q, mine:answers[i]});
+    const qEl = root.querySelector(`.q[data-qidx="${i}"]`);
+    qEl.querySelectorAll('.opt').forEach(op=>{
+      const j = Number(op.dataset.opt);
+      op.classList.remove('correct','wrong');
+      op.querySelector('input').disabled = true;
+      if(j === q.a) op.classList.add('correct');
+      else if(j === answers[i]) op.classList.add('wrong');
+    });
+  });
+
+  const total = quiz.questions.length;
+  const percent = Math.round(correct/total*100);
+  let verdict, cls;
+  if(percent >= 90){ verdict = 'Өте жақсы! 🎉'; cls='ok'; }
+  else if(percent >= 75){ verdict = 'Жақсы! 👍'; cls='ok'; }
+  else if(percent >= 50){ verdict = 'Қайталап оқы. 📖'; cls='info'; }
+  else { verdict = 'Теорияны қайта қарап, тағы тапсыр. 🔁'; cls='bad'; }
+
+  const resEl = document.getElementById('res-'+qid);
+  resEl.innerHTML = `
+    <div class="result-box">
+      <div class="result-score">${percent}%</div>
+      <div class="progressbar"><i style="width:${percent}%"></i></div>
+      <div class="result-verdict">${verdict}</div>
+      <div class="mini-stats">
+        <span>Дұрыс жауап: <b>${correct}</b></span>
+        <span>Қате жауап: <b>${total-correct}</b></span>
+        <span>Барлық сұрақ: <b>${total}</b></span>
+      </div>
+      ${wrong.length ? `<div class="review"><b>Қате сұрақтарды талдау:</b>
+        ${wrong.map(w=>`<div class="review-item">
+          <div><b>${w.i+1}.</b> ${w.q.q}</div>
+          <div class="mine">Сенің жауабың: ${w.mine>=0 ? w.q.o[w.mine] : '— жауап берілмеді'}</div>
+          <div class="ans">Дұрыс жауап: ${w.q.o[w.q.a]}</div>
+          <div class="small muted">${w.q.e}</div>
+        </div>`).join('')}
+      </div>` : `<div class="feedback ok show">Барлық сұраққа дұрыс жауап бердің! Керемет!</div>`}
+    </div>`;
+
+  if(quiz.kind === 'topic'){
+    const tp = topicProg(quiz.topicId);
+    tp.test = {correct, total, percent, date:new Date().toISOString()};
+    saveProgress(); updateTopProgress();
+  } else if(quiz.kind === 'final'){
+    progress.final = {correct, total, percent, date:new Date().toISOString()};
+    saveProgress(); updateTopProgress();
+  }
+}
+
+function resetQuiz(qid){
+  const root = document.querySelector(`.quiz[data-quiz="${qid}"]`);
+  if(!root) return;
+  root.querySelectorAll('input[type=radio]').forEach(i=>{ i.checked=false; i.disabled=false; });
+  root.querySelectorAll('.opt').forEach(o=>o.classList.remove('correct','wrong'));
+  const resEl = document.getElementById('res-'+qid);
+  if(resEl) resEl.innerHTML = '';
+}
+
+/* =========================================================================
+   INTERACTIVE TASKS
+   ========================================================================= */
+const TT_STATE = {};
+const MS_STATE = {};
+const FB_STATE = {};
+const CE_STATE = {};
+
+function renderTask(task, topicId){
+  const t = topicProg(topicId);
+  const done = t.tasks[task.id] ? '<span class="badge done" style="background:var(--ok);color:#fff;border-radius:20px;padding:2px 9px;font-size:11px;margin-left:8px">✓ орындалды</span>' : '';
+  let body = '';
+  if(task.type === 'multiselect'){
+    body = `
+      ${task.table ? tableHTML(task.table.columns, task.table.rows) : ''}
+      <div class="opts-list">
+        ${task.options.map((o,i)=>`<label class="opt-check" data-ms-opt="${task.id}" data-idx="${i}">
+          <input type="checkbox" data-ms-cb="${task.id}" data-idx="${i}"><span>${o}</span></label>`).join('')}
+      </div>
+      <button class="btn primary small" data-ms-check="${task.id}">Тексеру</button>`;
+  }
+  else if(task.type === 'quiz'){
+    body = `<p class="task-prompt">${task.prompt}</p>` + quizHTML(task.questions, 'task-'+task.id);
+  }
+  else if(task.type === 'tabletask'){
+    body = `<p class="task-prompt">${task.prompt}</p>` + tabletaskHTML(task);
+  }
+  else if(task.type === 'fillblanks'){
+    body = `<p class="task-prompt">${task.prompt}</p>` + fillblanksHTML(task);
+  }
+  else if(task.type === 'clickerrors'){
+    body = `<p class="task-prompt">${task.prompt}</p>` + clickerrorsHTML(task);
+  }
+  else if(task.type === 'link'){
+    body = `<p class="task-prompt">${task.prompt}</p>
+      <button class="btn orange" data-nav-btn="${task.linkRoute}">${task.linkText}</button>
+      <div class="feedback info show" style="margin-top:12px">${task.explain}</div>`;
+  }
+
+  return `<div class="task" data-task-id="${task.id}">
+    <div class="task-head"><span class="task-num">ТАПСЫРМА</span><span class="task-title">${task.title}${done}</span></div>
+    ${body}
+    <div class="feedback" id="fb-${task.id}"></div>
+  </div>`;
+}
+
+/* ---------------- tabletask (sort / filter / find) ---------------------- */
+function tabletaskHTML(task){
+  if(!TT_STATE[task.id]){
+    TT_STATE[task.id] = {
+      search:'', sortKey:null, sortDir:'asc', filters:{},
+      ops:{}, sortClicks:0
+    };
+  }
+  let controls = '';
+  if(task.mode === 'find'){
+    controls = `<div class="ctrl-row">
+      <div class="ctrl" style="flex:1;max-width:340px"><span>🔍</span>
+        <input type="text" placeholder="Іздеу..." style="border:0;outline:0;width:100%" data-tt-search="${task.id}">
+      </div>
+      <span class="small muted">Қажетті жолды басып таңда</span>
+    </div>`;
+  }
+  if(task.mode === 'filter'){
+    controls = `<div class="ctrl-row">` + task.controls.map(c=>{
+      if(c.kind === 'select'){
+        const vals = [...new Set(task.rows.map(r=>r[c.key]))].sort((a,b)=>String(a).localeCompare(String(b),'kk'));
+        return `<label class="ctrl"><span>${c.label}</span>
+          <select data-tt-filter="${task.id}" data-key="${c.key}">
+            <option value="">Барлығы</option>
+            ${vals.map(v=>`<option value="${v}">${v}</option>`).join('')}
+          </select></label>`;
+      }
+      if(c.kind === 'num'){
+        return `<label class="ctrl"><span>${c.label}</span>
+          <select data-tt-op="${task.id}" data-key="${c.key}">
+            ${['>','<','=','>=','<='].map(op=>`<option value="${op}" ${c.fixedOp===op?'selected':''}>${op.replace('>','&gt;').replace('<','&lt;')}</option>`).join('')}
+          </select>
+          <input type="number" placeholder="мән" data-tt-num="${task.id}" data-key="${c.key}" style="width:90px">
+        </label>`;
+      }
+      return '';
+    }).join('') + `<button class="btn ghost small" data-tt-clear="${task.id}">Сүзгіні тазалау</button></div>`;
+  }
+  if(task.mode === 'sort'){
+    controls = `<div class="ctrl-row">
+      <span class="small muted">Баған атауын бас — сұрыптау бағыты ауысады:</span>
+      ${task.columns.map(c=>`<button class="btn small" data-tt-sort="${task.id}" data-key="${c.key}">${c.label} <span data-tt-arrow="${task.id}-${c.key}"></span></button>`).join('')}
+    </div>`;
+  }
+  return `<div class="tabletask" data-tt="${task.id}">
+    ${controls}
+    <div data-tt-body="${task.id}"></div>
+    <div class="ctrl-row" style="margin-top:12px">
+      <button class="btn primary small" data-tt-check="${task.id}">Тексеру</button>
+      <span class="small muted" data-tt-count="${task.id}"></span>
+    </div>
+  </div>`;
+}
+
+function ttGetRows(task){
+  const st = TT_STATE[task.id];
+  const filters = Object.keys(st.filters).map(k=>({key:k, value:st.filters[k], op:st.ops[k]||'='}));
+  return applyQuery(task.rows, {
+    search: st.search,
+    searchKeys: task.searchKeys || task.columns.map(c=>c.key),
+    filters: filters,
+    sortKey: st.sortKey,
+    sortDir: st.sortDir
+  });
+}
+
+function ttRender(task){
+  const st = TT_STATE[task.id];
+  const rows = ttGetRows(task);
+  const opts = {
+    sortable: task.mode === 'sort',
+    sortKey: st.sortKey,
+    sortDir: st.sortDir
+  };
+  let rowAttrs = '';
+  if(task.mode === 'find'){ opts.rowClass = ()=>'clickable'; opts.rowAttrs = r=>`data-tt-row="${task.id}" data-rowid="${r.id}"`; }
+  if(task.mode === 'filter'){ opts.rowAttrs = r=>`data-rowid="${r.id}"`; }
+
+  const bodyEl = document.querySelector(`[data-tt-body="${task.id}"]`);
+  if(bodyEl) bodyEl.innerHTML = tableHTML(task.columns, rows, opts);
+  const cntEl = document.querySelector(`[data-tt-count="${task.id}"]`);
+  if(cntEl) cntEl.textContent = `Көрсетілген жазба саны: ${rows.length} / ${task.rows.length}`;
+  if(task.mode === 'sort'){
+    task.columns.forEach(c=>{
+      const el = document.querySelector(`[data-tt-arrow="${task.id}-${c.key}"]`);
+      if(el) el.textContent = (st.sortKey === c.key) ? (st.sortDir === 'desc' ? '↓' : '↑') : '';
+    });
+  }
+}
+
+/* ---------------- fillblanks -------------------------------------------- */
+function fillblanksHTML(task){
+  if(!FB_STATE[task.id]) FB_STATE[task.id] = {};
+  const st = FB_STATE[task.id];
+  const head = task.columns.map(c=>`<th>${c.label}</th>`).join('');
+  const body = task.rows.map((r,ri)=>{
+    const tds = task.columns.map(c=>{
+      const blank = task.blanks.find(b=>b.row===ri && b.key===c.key);
+      if(blank){
+        return `<td><select data-fb="${task.id}" data-row="${ri}" data-key="${c.key}" style="padding:4px 7px;border:1px solid var(--border);border-radius:7px">
+          <option value="">— таңда —</option>
+          ${blank.options.map(o=>`<option value="${o}" ${st[ri+'-'+c.key]===o?'selected':''}>${o}</option>`).join('')}
+        </select></td>`;
+      }
+      return `<td>${r[c.key] === null ? '' : r[c.key]}</td>`;
+    }).join('');
+    return `<tr>${tds}</tr>`;
+  }).join('');
+  return `<div class="tablewrap"><table class="dtable"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>
+    <button class="btn primary small" style="margin-top:12px" data-fb-check="${task.id}">Тексеру</button>`;
+}
+
+/* ---------------- clickerrors ------------------------------------------- */
+function clickerrorsHTML(task){
+  if(!CE_STATE[task.id]) CE_STATE[task.id] = new Set();
+  const st = CE_STATE[task.id];
+  const head = `<th style="width:44px">#</th>` + task.columns.map(c=>`<th>${c.label}</th>`).join('');
+  const body = task.rows.map((r,ri)=>{
+    const tds = task.columns.map(c=>{
+      const id = ri+'-'+c.key;
+      const val = String(r[c.key]||'');
+      const sel = st.has(id) ? 'selected' : '';
+      return `<td class="${sel}" data-ce="${task.id}" data-cell="${id}" style="cursor:pointer;${val===''?'background:#fafafa;':''}">${val===''?'<span class="muted">(бос)</span>':val}</td>`;
+    }).join('');
+    return `<tr><td class="muted small">${ri+1}</td>${tds}</tr>`;
+  }).join('');
+  return `<div class="tablewrap"><table class="dtable"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>
+    <div class="small muted" style="margin-top:8px">Таңдалған ұяшықтар күлгін түспен белгіленеді. Қайта бассаң — таңдау алынады.</div>
+    <button class="btn primary small" style="margin-top:12px" data-ce-check="${task.id}">Тексеру</button>`;
+}
+
+/* =========================================================================
+   DATA LAB
+   ========================================================================= */
+const LAB = {
+  ds:'library', search:'', sortKey:null, sortDir:'asc',
+  logic:'AND', conds:[], searchKeys:null
+};
+
+function labConditions(){
+  return LAB.conds.filter(c=>c.value !== '' && c.value !== null && c.value !== undefined);
+}
+function labQuery(){
+  const ds = DATASETS[LAB.ds];
+  const conds = labConditions();
+  let rows;
+  if(conds.length === 0){
+    rows = applyQuery(ds.rows, {search:LAB.search, sortKey:LAB.sortKey, sortDir:LAB.sortDir});
+  } else if(LAB.logic === 'AND'){
+    rows = applyQuery(ds.rows, {search:LAB.search, filters:conds, sortKey:LAB.sortKey, sortDir:LAB.sortDir});
+  } else {
+    // OR: біріктіру
+    const sets = conds.map(c=>applyQuery(ds.rows, {filters:[c]}));
+    const map = new Map();
+    sets.forEach(s=>s.forEach(r=>map.set(r.id, r)));
+    rows = [...map.values()];
+    if(LAB.search){
+      const q = LAB.search.toLowerCase();
+      rows = rows.filter(r => Object.keys(r).some(k=>String(r[k]).toLowerCase().includes(q)));
+    }
+    if(LAB.sortKey){
+      const dir = LAB.sortDir === 'desc' ? -1 : 1;
+      rows = rows.map((r,i)=>({r,i})).sort((x,y)=>{
+        const a=x.r[LAB.sortKey], b=y.r[LAB.sortKey];
+        let cmp = (typeof a==='number'&&typeof b==='number') ? a-b : String(a).localeCompare(String(b),'kk');
+        return cmp===0 ? x.i-y.i : cmp*dir;
+      }).map(o=>o.r);
+    }
+  }
+  return rows;
+}
+
+function renderLab(){
+  const ds = DATASETS[LAB.ds];
+  const rows = labQuery();
+  const view = document.getElementById('view');
+  view.innerHTML = `
+    <h1>🧪 Data Lab — интерактивті зертхана</h1>
+    <p class="muted" style="margin-bottom:16px">Дайын деректер базасымен тікелей браузерде жұмыс істе: ізде, сұрыпта, сүзгіле, кеңейтілген сүзгі шарттарын қолдан. Барлық әрекет шынайы орындалады.</p>
+
+    <div class="card">
+      <div class="ctrl-row">
+        <label class="ctrl"><span>Деректер жиынтығы</span>
+          <select id="labDs">
+            ${Object.keys(DATASETS).map(k=>`<option value="${k}" ${LAB.ds===k?'selected':''}>${DATASETS[k].title}</option>`).join('')}
+          </select>
+        </label>
+        <div class="ctrl" style="flex:1;min-width:220px"><span>🔍</span>
+          <input type="text" id="labSearch" placeholder="Кестеден іздеу..." value="${LAB.search}" style="border:0;outline:0;width:100%">
+        </div>
+        <label class="ctrl"><span>Сұрыптау</span>
+          <select id="labSortKey">
+            <option value="">— жоқ —</option>
+            ${ds.columns.map(c=>`<option value="${c.key}" ${LAB.sortKey===c.key?'selected':''}>${c.label}</option>`).join('')}
+          </select>
+          <select id="labSortDir">
+            <option value="asc" ${LAB.sortDir==='asc'?'selected':''}>Өсу ↑</option>
+            <option value="desc" ${LAB.sortDir==='desc'?'selected':''}>Кему ↓</option>
+          </select>
+        </label>
+        <button class="btn ghost small" id="labReset">↺ Бастапқы күйге</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px">
+        <b>Кеңейтілген сүзгі</b>
+        <div class="logic-toggle">
+          <button data-lab-logic="AND" class="${LAB.logic==='AND'?'on':''}">AND (және)</button>
+          <button data-lab-logic="OR" class="${LAB.logic==='OR'?'on':''}">OR (немесе)</button>
+        </div>
+        <button class="btn small" id="labAddCond">+ Шарт қосу</button>
+        <span class="small muted">${LAB.logic==='AND' ? 'Барлық шарт орындалуы керек' : 'Кемінде бір шарт орындалса жеткілікті'}</span>
+      </div>
+
+      <div class="lab-filters">
+        ${LAB.conds.length === 0 ? '<div class="small muted">Шарт қосылмаған. «+ Шарт қосу» батырмасын бас.</div>' :
+          LAB.conds.map((c,i)=>{
+            const col = ds.columns.find(x=>x.key===c.key) || ds.columns[0];
+            return `<div class="cond">
+              <select data-cond-key="${i}">
+                ${ds.columns.map(x=>`<option value="${x.key}" ${c.key===x.key?'selected':''}>${x.label}</option>`).join('')}
+              </select>
+              <select data-cond-op="${i}">
+                <option value="=" ${c.op==='='?'selected':''}>= тең</option>
+                <option value="contains" ${c.op==='contains'?'selected':''}>құрайды</option>
+                <option value=">" ${c.op==='>'?'selected':''}>&gt; үлкен</option>
+                <option value="<" ${c.op==='<'?'selected':''}>&lt; кіші</option>
+                <option value=">=" ${c.op==='>='?'selected':''}>≥ үлкен/тең</option>
+                <option value="<=" ${c.op==='<='?'selected':''}>≤ кіші/тең</option>
+              </select>
+              ${col.type === 'num' && (c.op==='>'||c.op==='<'||c.op==='>='||c.op==='<='||c.op==='=')
+                ? `<input type="number" data-cond-val="${i}" value="${c.value!==undefined?c.value:''}" placeholder="мән">`
+                : `<input type="text" data-cond-val="${i}" value="${c.value!==undefined?c.value:''}" placeholder="мән">`}
+              <button class="rm" data-cond-rm="${i}">✕</button>
+            </div>`;
+          }).join('')}
+      </div>
+
+      <div class="lab-meta">
+        <span>Нәтиже: <b>${rows.length}</b> жазба</span>
+        <span>Барлығы: <b>${DATASETS[LAB.ds].rows.length}</b> жазба</span>
+        ${LAB.sortKey ? `<span>Сұрыптау: <b>${ds.columns.find(c=>c.key===LAB.sortKey).label}</b> (${LAB.sortDir==='asc'?'өсу':'кему'})</span>` : ''}
+        ${labConditions().length ? `<span>Сүзгі шарттары: <b>${labConditions().length}</b> (${LAB.logic})</span>` : ''}
+      </div>
+
+      ${tableHTML(ds.columns, rows, {sortable:true, sortKey:LAB.sortKey, sortDir:LAB.sortDir, tableId:'lab'})}
+      <p class="small muted" style="margin-top:10px">💡 Кесте тақырыптарын басу арқылы да сұрыптауға болады.</p>
+    </div>`;
+}
+
+/* =========================================================================
+   MINI PROJECT
+   ========================================================================= */
+const PROJECT_TYPES = [
+  {id:'p1', name:'Мектеп кітапханасының деректер базасы', fields:['ID','Кітап атауы','Авторы','Шыққан жылы','Жанры','Дана саны']},
+  {id:'p2', name:'Спорт үйірмелерінің қатысушылары', fields:['ID','Аты-жөні','Үйірме','Жасы','Тәжірибесі (жыл)']},
+  {id:'p3', name:'Дүкен тауарларының тізімі', fields:['ID','Тауар атауы','Санаты','Бағасы','Қалдық саны']},
+  {id:'p4', name:'Сынып оқушыларының үлгі деректер базасы', fields:['ID','Оқушы','Сыныбы','Информатика','Математика']},
+  {id:'p5', name:'Мектептегі іс-шаралар кестесі', fields:['ID','Іс-шара атауы','Өтетін күні','Орны','Қатысушылар саны']}
+];
+const FIELD_POOL = ['Мұғалімнің телефоны','Ауа райы болжамы','Сабақ кестесі','Кітап мұқабасының түсі','Оқушының сүйікті әні','Автобус нөмірі'];
+
+let projectState = null;
+function initProjectState(){
+  if(progress.project && progress.project.state){ projectState = progress.project.state; }
+  else{
+    projectState = {typeId:null, title:'', fields:[], pool:[...FIELD_POOL], rows:[], done:{search:false,sort:false,filter:false,advanced:false}, conclusion:'', score:null};
+  }
+  if(!projectState.rows) projectState.rows = [];
+  if(!projectState.done) projectState.done = {search:false,sort:false,filter:false,advanced:false};
+  if(!projectState.pool) projectState.pool = [...FIELD_POOL];
+}
+function saveProject(){
+  if(!progress.project) progress.project = {};
+  progress.project.state = projectState;
+  saveProgress();
+}
+
+function projectScore(){
+  const s = projectState;
+  let structure = 0, data = 0, search = 0, sort = 0, filter = 0, conclusion = 0;
+
+  // Кесте құрылымы 20
+  if(s.typeId) structure += 5;
+  if(s.title && s.title.trim().length >= 3) structure += 5;
+  if(s.fields.length >= 4) structure += 6;
+  else if(s.fields.length > 0) structure += Math.round(s.fields.length/4*6);
+  if(s.fields.some(f=>/id/i.test(f))) structure += 4;
+
+  // Деректердің дұрыстығы 20
+  if(s.rows.length >= 3) data += 8;
+  else data += Math.round(s.rows.length/3*8);
+  const emptyCells = s.rows.reduce((n,r)=>n + s.fields.filter(f=>r[f]===undefined||r[f]==='').length, 0);
+  if(s.rows.length && emptyCells === 0) data += 7;
+  else if(s.rows.length) data += Math.max(0, 7 - emptyCells);
+  const ids = s.rows.map(r=>r[s.fields[0]]).filter(v=>v!==undefined&&v!=='');
+  const uniqueIds = new Set(ids);
+  if(ids.length && uniqueIds.size === ids.length) data += 5;
+
+  if(s.done.search) search = 15;
+  if(s.done.sort) sort = 15;
+  if(s.done.filter) filter = 15;
+  if(s.done.advanced) filter = 15; // кеңейтілген сүзгі де сол санатқа кіреді
+
+  if(s.conclusion && s.conclusion.trim().length >= 40) conclusion = 15;
+  else if(s.conclusion && s.conclusion.trim().length > 0) conclusion = Math.round(s.conclusion.trim().length/40*15);
+
+  const total = Math.min(100, structure + data + search + sort + filter + conclusion);
+  return {
+    structure:Math.min(20,structure), data:Math.min(20,data),
+    search, sort, filter, conclusion, total
+  };
+}
+
+function renderProject(){
+  initProjectState();
+  const s = projectState;
+  const sc = projectScore();
+  const type = PROJECT_TYPES.find(t=>t.id===s.typeId);
+  const view = document.getElementById('view');
+
+  view.innerHTML = `
+    <h1>🛠️ Мини-жоба: «Өз деректер базамды жасаймын»</h1>
+    <p class="muted" style="margin-bottom:16px">Жоба тақырыбын таңда, өрістерді анықта, деректер енгіз, содан кейін іздеу, сұрыптау және сүзгілеу кезеңдерін орында. Соңында 100 балдық жүйемен баға аласың.</p>
+
+    <div class="card">
+      <h2>1. Жоба тақырыбын таңдау</h2>
+      <div class="grid-2">
+        ${PROJECT_TYPES.map(t=>`
+          <div class="feature" data-proj-type="${t.id}" style="${s.typeId===t.id?'border-color:var(--purple);background:var(--purple-soft)':''}">
+            <div class="fi">${s.typeId===t.id?'✓':'📁'}</div>
+            <div class="ft">${t.name}</div>
+            <div class="fd">${t.fields.length} дайын өріс</div>
+          </div>`).join('')}
+      </div>
+      <div style="margin-top:14px">
+        <label class="small muted">Кесте атауы</label>
+        <input class="input" id="projTitle" placeholder="Мысалы: 9А сыныбының кітапхана базасы" value="${s.title||''}">
+      </div>
+    </div>
+
+    ${s.typeId ? `
+    <div class="card">
+      <h2>2. Өрістерді таңдау</h2>
+      <p class="small muted">Дайын өрістерден таңда немесе өзің қос. Артық өрістерді алып таста.</p>
+      <div style="margin:10px 0">
+        ${s.fields.map(f=>`<span class="field-chip">${f}<span class="x" data-proj-rmfield="${f}">✕</span></span>`).join('')}
+        ${s.fields.length===0?'<span class="small muted">Әзірге өріс таңдалмаған.</span>':''}
+      </div>
+      <div class="divider"></div>
+      <div>
+        <div class="small muted" style="margin-bottom:6px">Ұсынылған өрістер:</div>
+        ${(type?type.fields:[]).filter(f=>!s.fields.includes(f)).map(f=>`<span class="pick-chip" data-proj-addfield="${f}">+ ${f}</span>`).join('') || '<span class="small muted">Барлығы қосылды</span>'}
+      </div>
+      <div style="margin-top:10px">
+        <div class="small muted" style="margin-bottom:6px">Бұл жобаға қатысы жоқ өрістер (қоспау керек):</div>
+        ${s.pool.filter(f=>!s.fields.includes(f)).map(f=>`<span class="pick-chip" data-proj-addfield="${f}" style="border-color:#f3c9c9;color:#b63636">+ ${f}</span>`).join('') || '<span class="small muted">—</span>'}
+      </div>
+      <div style="margin-top:10px">
+        <input class="input" id="projNewField" placeholder="Өз өрісіңді жаз..." style="max-width:260px">
+        <button class="btn small" id="projAddCustom" style="margin-left:8px">Қосу</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>3. Үлгі деректер енгізу</h2>
+      ${s.fields.length >= 2 ? `
+        <div class="tablewrap"><table class="dtable">
+          <thead><tr>${s.fields.map(f=>`<th>${f}</th>`).join('')}<th style="width:50px"></th></tr></thead>
+          <tbody>
+            ${s.rows.map((r,ri)=>`<tr>
+              ${s.fields.map(f=>`<td><input class="input" style="max-width:100%;padding:5px 8px;border:1px solid var(--border)" data-proj-cell="${ri}" data-key="${f}" value="${r[f]||''}"></td>`).join('')}
+              <td><button class="rm" data-proj-delrow="${ri}" style="background:#fdeaea;border:1px solid #f3c9c9;color:#b63636;border-radius:8px;width:26px;height:26px;cursor:pointer">✕</button></td>
+            </tr>`).join('')}
+            ${s.rows.length===0?`<tr><td colspan="${s.fields.length+1}" style="text-align:center;color:#8b90a3;padding:16px">Әзірге жазба жоқ. «Жазба қосу» батырмасын бас.</td></tr>`:''}
+          </tbody>
+        </table></div>
+        <button class="btn small primary" id="projAddRow" style="margin-top:12px">+ Жазба қосу</button>
+      ` : '<p class="muted">Алдымен кемінде 2 өріс таңда.</p>'}
+    </div>
+
+    ${s.rows.length ? `
+    <div class="card">
+      <h2>4. Деректермен жұмыс</h2>
+      <p class="small muted">Өз кестеңде іздеу, сұрыптау және сүзгілеу кезеңдерін орында. Орындалған әрекеттер автоматты түрде бағаланады.</p>
+
+      <div class="ctrl-row" style="margin-top:12px">
+        <div class="ctrl" style="flex:1;min-width:200px"><span>🔍</span>
+          <input type="text" id="projSearch" placeholder="Іздеу..." style="border:0;outline:0;width:100%" value="${s._search||''}">
+        </div>
+        <label class="ctrl"><span>Сұрыптау</span>
+          <select id="projSortKey"><option value="">— жоқ —</option>
+            ${s.fields.map(f=>`<option value="${f}" ${s._sortKey===f?'selected':''}>${f}</option>`).join('')}
+          </select>
+          <select id="projSortDir">
+            <option value="asc" ${s._sortDir!=='desc'?'selected':''}>Өсу ↑</option>
+            <option value="desc" ${s._sortDir==='desc'?'selected':''}>Кему ↓</option>
+          </select>
+        </label>
+        <label class="ctrl"><span>Сүзгі</span>
+          <select id="projFilterKey"><option value="">— жоқ —</option>
+            ${s.fields.map(f=>`<option value="${f}" ${s._filterKey===f?'selected':''}>${f}</option>`).join('')}
+          </select>
+          <input id="projFilterVal" placeholder="мән" value="${s._filterVal||''}" style="width:100px">
+        </label>
+        <button class="btn ghost small" id="projResetFilters">Тазалау</button>
+      </div>
+
+      <div class="lab-meta">
+        <span>Көрсетілген жазба: <b>${s._viewRows ? s._viewRows.length : s.rows.length}</b> / ${s.rows.length}</span>
+        <span>Іздеу: <b>${s.done.search?'✓ орындалды':'—'}</b></span>
+        <span>Сұрыптау: <b>${s.done.sort?'✓ орындалды':'—'}</b></span>
+        <span>Сүзгілеу: <b>${s.done.filter?'✓ орындалды':'—'}</b></span>
+      </div>
+
+      <div id="projTable"></div>
+    </div>
+
+    <div class="card">
+      <h2>5. Қорытынды</h2>
+      <textarea class="input" id="projConclusion" placeholder="Не үйрендің? Қандай нәтиже алдың? Қандай қиындық болды?">${s.conclusion||''}</textarea>
+      <div class="btn-row">
+        <button class="btn orange" id="projEvaluate">Жобаны тексеру және бағалау</button>
+      </div>
+      <div id="projResult"></div>
+    </div>
+    ` : ''}
+    ` : ''}
+  `;
+
+  if(s.rows.length) renderProjTable();
+  renderProjResult();
+}
+
+function renderProjTable(){
+  const s = projectState;
+  let rows = s.rows.slice();
+  const search = (s._search||'').trim().toLowerCase();
+  if(search){
+    rows = rows.filter(r=>s.fields.some(f=>String(r[f]||'').toLowerCase().includes(search)));
+  }
+  if(s._filterKey && s._filterVal){
+    const v = String(s._filterVal).toLowerCase();
+    rows = rows.filter(r=>String(r[s._filterKey]||'').toLowerCase().includes(v));
+  }
+  if(s._sortKey){
+    const dir = s._sortDir === 'desc' ? -1 : 1;
+    rows = rows.map((r,i)=>({r,i})).sort((x,y)=>{
+      const a = x.r[s._sortKey], b = y.r[s._sortKey];
+      const na = Number(a), nb = Number(b);
+      let cmp;
+      if(a!=='' && b!=='' && !isNaN(na) && !isNaN(nb)) cmp = na - nb;
+      else cmp = String(a||'').localeCompare(String(b||''), 'kk');
+      return cmp === 0 ? x.i - y.i : cmp*dir;
+    }).map(o=>o.r);
+  }
+  s._viewRows = rows;
+  const el = document.getElementById('projTable');
+  if(el) el.innerHTML = tableHTML(s.fields.map(f=>({key:f,label:f})), rows);
+}
+
+function renderProjResult(){
+  const s = projectState;
+  const el = document.getElementById('projResult');
+  if(!el) return;
+  if(s.score === null || s.score === undefined){
+    el.innerHTML = '';
+    return;
+  }
+  const sc = s.score;
+  let fb = '';
+  if(sc.total >= 90) fb = 'Өте жақсы! Жоба толық талапқа сай орындалды. 🎉';
+  else if(sc.total >= 75) fb = 'Жақсы! Кейбір бөліктерді толықтыруға болады. 👍';
+  else if(sc.total >= 50) fb = 'Орташа. Жобаның жетіспейтін бөліктерін толықтыр. 📖';
+  else fb = 'Жоба толық орындалмаған. Кезеңдерді қайта қарап, аяқта. 🔁';
+
+  el.innerHTML = `
+    <div class="result-box" style="margin-top:16px">
+      <div class="score-big">${sc.total} / 100</div>
+      <div class="progressbar"><i style="width:${sc.total}%"></i></div>
+      <div class="result-verdict">${fb}</div>
+      <div style="margin-top:10px">
+        <div class="crit"><span>Кесте құрылымы</span><span class="v">${sc.structure} / 20</span></div>
+        <div class="crit"><span>Деректердің дұрыстығы</span><span class="v">${sc.data} / 20</span></div>
+        <div class="crit"><span>Іздеу</span><span class="v">${sc.search} / 15</span></div>
+        <div class="crit"><span>Сұрыптау</span><span class="v">${sc.sort} / 15</span></div>
+        <div class="crit"><span>Сүзгілеу</span><span class="v">${sc.filter} / 15</span></div>
+        <div class="crit"><span>Қорытынды және рәсімдеу</span><span class="v">${sc.conclusion} / 15</span></div>
+      </div>
+    </div>`;
+}
+
+/* =========================================================================
+   VIEWS
+   ========================================================================= */
+let route = {name:'home', param:null};
+
+function navigate(name, param){
+  route = {name, param:param!==undefined?param:null};
+  closeSidebar();
+  render();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function updateTopProgress(){
+  let doneCount = 0;
+  TOPICS.forEach(t=>{
+    const p = progress.topics[t.id];
+    if(p && p.test) doneCount++;
+  });
+  const totalPoints = doneCount * 100 + (progress.final ? progress.final.percent : 0);
+  const maxPoints = TOPICS.length * 100 + 100;
+  const pct = Math.round(totalPoints / maxPoints * 100);
+  const el = document.getElementById('topProgress');
+  if(el) el.textContent = pct + '%';
+}
+
+function renderSidebar(){
+  document.querySelectorAll('.nav-item').forEach(el=>{
+    const n = el.dataset.nav;
+    let active = false;
+    if(n === route.name) active = true;
+    if(n === 'topics' && route.name === 'topic') active = true;
+    if(n === 'tests' && route.name === 'test') active = true;
+    el.classList.toggle('active', active);
+  });
+}
+
+/* ------------------------------- HOME ----------------------------------- */
+function renderHome(){
+  const view = document.getElementById('view');
+  let doneCount = 0, sumPct = 0, testsDone = 0;
+  TOPICS.forEach(t=>{
+    const p = progress.topics[t.id];
+    if(p && p.test){ doneCount++; sumPct += p.test.percent; testsDone++; }
+  });
+  const avg = testsDone ? Math.round(sumPct/testsDone) : 0;
+
+  view.innerHTML = `
+    <div class="hero">
+      <div class="tagline">9-сынып · Информатика · III бөлім</div>
+      <h1>III. ДЕРЕКТЕР БАЗАСЫ</h1>
+      <p>Деректерді ұйымдастыр, ақпаратты жылдам тап, кестелерді сұрыпта және сүзгілер арқылы қажетті нәтижені анықта!</p>
+      <div class="btn-row">
+        <button class="btn orange" data-nav-btn="topics">🚀 Оқуды бастау</button>
+        <button class="btn ghost" data-nav-btn="lab">🧪 Data Lab</button>
+        <button class="btn ghost" data-nav-btn="project">🛠️ Мини-жоба</button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="label">Оқу тақырыбы</div><div class="value">7</div><div class="sub">3.1 – 3.8</div></div>
+      <div class="stat"><div class="label">Тест сұрағы</div><div class="value">100</div><div class="sub">70 тақырыптық + 30 қорытынды</div></div>
+      <div class="stat"><div class="label">Аяқталған тақырып</div><div class="value">${doneCount}/7</div><div class="sub">тест тапсырылды</div></div>
+      <div class="stat"><div class="label">Орташа нәтиже</div><div class="value">${avg}%</div><div class="sub">тақырыптық тесттер</div></div>
+    </div>
+
+    <div class="card">
+      <h2>Деректер базасының үлгі кестесі</h2>
+      <p class="small muted" style="margin-bottom:10px">Төмендегі кестені іздеу, сұрыптау және сүзгілеу арқылы зерттеп көр. Бұл — тек мысал деректер.</p>
+      <div data-tt-body="home"></div>
+    </div>
+
+    <h2 style="margin:22px 0 12px">Оқу тақырыптары</h2>
+    <div class="grid-3">
+      ${TOPICS.map(t=>{
+        const p = progress.topics[t.id];
+        const hasTest = p && p.test;
+        return `<div class="feature" data-nav-topic="${t.id}">
+          <div class="fi" style="${hasTest?'background:var(--ok-soft);color:var(--ok)':''}">${hasTest?'✓':t.num}</div>
+          <div class="ft">${t.title}</div>
+          <div class="fd">${t.short}</div>
+          ${hasTest?`<div class="small" style="color:var(--ok);margin-top:6px;font-weight:700">Тест: ${hasTest.percent}%</div>`:''}
+        </div>`;
+      }).join('')}
+    </div>
+
+    <h2 style="margin:22px 0 12px">Платформа бөлімдері</h2>
+    <div class="grid-3">
+      <div class="feature" data-nav-btn="lab"><div class="fi">🧪</div><div class="ft">Data Lab</div><div class="fd">Нақты жұмыс істейтін интерактивті кестелер</div></div>
+      <div class="feature" data-nav-btn="practice"><div class="fi">✍️</div><div class="ft">Практикалық тапсырмалар</div><div class="fd">Барлық тақырыптың интерактивті тапсырмалары</div></div>
+      <div class="feature" data-nav-btn="project"><div class="fi">🛠️</div><div class="ft">Мини-жоба</div><div class="fd">Өз деректер базаңды құр және баға ал</div></div>
+      <div class="feature" data-nav-btn="tests"><div class="fi">📝</div><div class="ft">Тақырыптық тесттер</div><div class="fd">7 тест × 10 сұрақ</div></div>
+      <div class="feature" data-nav-btn="final"><div class="fi">🎯</div><div class="ft">Қорытынды тест</div><div class="fd">30 сұрақ, барлық тақырып қамтылады</div></div>
+      <div class="feature" data-nav-btn="results"><div class="fi">📊</div><div class="ft">Менің нәтижелерім</div><div class="fd">Прогресс пен бағалар</div></div>
+    </div>
+  `;
+
+  // Үлгі кесте — интерактивті
+  const homeTask = {
+    id:'home',
+    columns:[{key:'id',label:'ID'},{key:'name',label:'Оқушы'},{key:'cls',label:'Сынып'},{key:'inf',label:'Информатика бағасы'}],
+    rows:DATASETS.students.rows.map(r=>({id:r.id,name:r.name,cls:r.cls,inf:r.inf})),
+    mode:'sort'
+  };
+  TT_STATE['home'] = {search:'', sortKey:null, sortDir:'asc', filters:{}, ops:{}};
+  const homeBody = document.querySelector('[data-tt-body="home"]');
+  if(homeBody){
+    homeBody.innerHTML = tableHTML(homeTask.columns, homeTask.rows, {});
+    homeBody.insertAdjacentHTML('afterbegin',
+      `<div class="ctrl-row">
+        <div class="ctrl" style="flex:1;max-width:300px"><span>🔍</span><input type="text" id="homeSearch" placeholder="Іздеу..." style="border:0;outline:0;width:100%"></div>
+        <label class="ctrl"><span>Сынып</span><select id="homeCls"><option value="">Барлығы</option>${[...new Set(homeTask.rows.map(r=>r.cls))].map(c=>`<option value="${c}">${c}</option>`).join('')}</select></label>
+        <button class="btn small" id="homeSortInf">Баға бойынша ↓</button>
+      </div>`);
+    const refresh = ()=>{
+      const q = document.getElementById('homeSearch').value;
+      const cls = document.getElementById('homeCls').value;
+      const sortKey = document.getElementById('homeSortInf').dataset.on === '1' ? 'inf' : null;
+      const st = TT_STATE['home'];
+      const rows = applyQuery(homeTask.rows, {
+        search:q,
+        filters: cls ? [{key:'cls', value:cls}] : [],
+        sortKey, sortDir:'desc'
+      });
+      homeBody.querySelector('table').outerHTML = tableHTML(homeTask.columns, rows, {});
+      homeBody.querySelector('table').insertAdjacentHTML('beforebegin','');
+    };
+    document.getElementById('homeSearch').addEventListener('input', refresh);
+    document.getElementById('homeCls').addEventListener('change', refresh);
+    document.getElementById('homeSortInf').addEventListener('click', (e)=>{
+      const b = e.currentTarget;
+      b.dataset.on = b.dataset.on === '1' ? '0' : '1';
+      b.textContent = b.dataset.on === '1' ? 'Баға бойынша ↑' : 'Баға бойынша ↓';
+      refresh();
+    });
+  }
+}
+
+/* ------------------------------ TOPICS ---------------------------------- */
+function renderTopics(){
+  const view = document.getElementById('view');
+  view.innerHTML = `
+    <h1>📚 Оқу тақырыптары</h1>
+    <p class="muted" style="margin-bottom:16px">«III. Деректер базасы» бөлімінің барлық тақырыптары. Әр тақырыпта теория, мысалдар, қадамдық нұсқаулық, интерактивті тапсырмалар және 10 сұрақтық тест бар.</p>
+    ${TOPICS.map(t=>{
+      const p = progress.topics[t.id];
+      const test = p && p.test;
+      const tasksDone = p ? Object.keys(p.tasks||{}).length : 0;
+      return `<div class="topic-row" data-nav-topic="${t.id}">
+        <div class="topic-num">${t.num}</div>
+        <div class="topic-info">
+          <div class="tt">${t.title}</div>
+          <div class="td">${t.short}</div>
+          <div class="small" style="margin-top:4px">
+            ${test ? `<span style="color:var(--ok);font-weight:700">Тест: ${test.correct}/${test.total} (${test.percent}%)</span>` : '<span class="muted">Тест тапсырылмаған</span>'}
+            · <span class="muted">Тапсырма: ${tasksDone}/2</span>
+          </div>
+        </div>
+        <div class="status-dot ${test?'done':''}"></div>
+      </div>`;
+    }).join('')}
+  `;
+}
+
+function renderTopic(id){
+  const t = TOPICS.find(x=>x.id===id);
+  if(!t){ navigate('topics'); return; }
+  const idx = TOPICS.indexOf(t);
+  const prev = idx > 0 ? TOPICS[idx-1] : null;
+  const next = idx < TOPICS.length-1 ? TOPICS[idx+1] : null;
+  const p = progress.topics[t.id];
+  const test = p && p.test;
+
+  const view = document.getElementById('view');
+  view.innerHTML = `
+    <div class="small muted" style="margin-bottom:8px">
+      <span style="cursor:pointer;color:var(--purple2)" data-nav-btn="topics">Оқу тақырыптары</span> / ${t.num}
+    </div>
+    <h1>${t.num}. ${t.title}</h1>
+
+    <div class="card" style="margin-top:14px">
+      <h3>🎯 Оқу мақсаты</h3>
+      <p>${t.goal}</p>
+    </div>
+
+    <div class="card">
+      <h2>📖 Теориялық материал</h2>
+      ${t.theory}
+    </div>
+
+    <div class="card">
+      <h2>💡 Нақты мысалдар</h2>
+      ${t.examples}
+    </div>
+
+    <div class="card">
+      <h2>🪜 Қадамдық нұсқаулық</h2>
+      <ol class="steps">${t.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
+    </div>
+
+    <div class="card" style="background:var(--purple-soft);border-color:#ded2f2">
+      <h3 style="color:var(--purple)">📌 Есте сақта!</h3>
+      <ul>${t.remember.map(r=>`<li>${r}</li>`).join('')}</ul>
+    </div>
+
+    <h2 style="margin:22px 0 6px">🧩 Интерактивті тапсырмалар</h2>
+    ${t.tasks.map(task=>renderTask(task, t.id)).join('')}
+
+    <h2 style="margin:22px 0 6px">📝 Тақырыптық тест (10 сұрақ)</h2>
+    <div class="card">
+      <p class="small muted" style="margin-bottom:12px">Әр сұрақта 4 жауап нұсқасы, біреуі ғана дұрыс. Тест соңында нәтиже автоматты есептеледі.</p>
+      ${test ? `<div class="feedback info show" style="margin-bottom:12px">Бұл тестті бұрын тапсырдың: <b>${test.correct}/${test.total} (${test.percent}%)</b>. Қайта тапсыруға болады.</div>` : ''}
+      ${quizHTML(TESTS[t.id], 'test-'+t.id)}
+    </div>
+
+    <div class="card">
+      <div class="btn-row" style="margin-top:0">
+        ${prev ? `<button class="btn" data-nav-topic="${prev.id}">← ${prev.num}. ${prev.title}</button>` : '<span></span>'}
+        ${next ? `<button class="btn primary" style="margin-left:auto" data-nav-topic="${next.id}">${next.num}. ${next.title} →</button>` : ''}
+      </div>
+    </div>
+  `;
+
+  // tabletask-тарды инициализациялау
+  t.tasks.forEach(task=>{
+    if(task.type === 'tabletask'){
+      TT_STATE[task.id] = {search:'', sortKey:null, sortDir:'asc', filters:{}, ops:{}};
+      ttRender(task);
+    }
+  });
+}
+
+/* ---------------------------- PRACTICE ---------------------------------- */
+function renderPractice(){
+  const view = document.getElementById('view');
+  view.innerHTML = `
+    <h1>✍️ Практикалық тапсырмалар</h1>
+    <p class="muted" style="margin-bottom:16px">Барлық тақырыптың интерактивті тапсырмалары бір жерде. Тапсырманы орындау үшін тиісті тақырып бетіне өт.</p>
+    ${TOPICS.map(t=>{
+      const p = progress.topics[t.id];
+      const done = p ? Object.keys(p.tasks||{}).length : 0;
+      return `<div class="card">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <div class="topic-num">${t.num}</div>
+          <div style="flex:1;min-width:180px">
+            <div style="font-weight:700">${t.title}</div>
+            <div class="small muted">${done}/2 тапсырма орындалды</div>
+          </div>
+          <div class="progressbar" style="width:130px;margin:0"><i style="width:${done/2*100}%"></i></div>
+          <button class="btn small primary" data-nav-topic="${t.id}">Ашу →</button>
+        </div>
+        <div class="divider"></div>
+        ${t.tasks.map(task=>`<div style="padding:6px 0;font-size:14px">
+          <b>${task.title}</b>
+          ${(progress.topics[t.id] && progress.topics[t.id].tasks[task.id]) ? '<span style="color:var(--ok);font-weight:700;margin-left:8px">✓ орындалды</span>' : '<span class="muted" style="margin-left:8px">— орындалмаған</span>'}
+        </div>`).join('')}
+      </div>`;
+    }).join('')}
+  `;
+}
+
+/* ------------------------------ TESTS ----------------------------------- */
+function renderTests(){
+  const view = document.getElementById('view');
+  view.innerHTML = `
+    <h1>📝 Тақырыптық тесттер</h1>
+    <p class="muted" style="margin-bottom:16px">Әр тақырыпқа 10 сұрақтан. Барлығы 70 сұрақ. Нәтиже автоматты есептеледі және сақталады.</p>
+    ${TOPICS.map(t=>{
+      const p = progress.topics[t.id];
+      const test = p && p.test;
+      return `<div class="card">
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+          <div class="topic-num">${t.num}</div>
+          <div style="flex:1;min-width:180px">
+            <div style="font-weight:700">${t.title}</div>
+            <div class="small muted">10 сұрақ · 4 жауап нұсқасы</div>
+          </div>
+          ${test ? `<div style="text-align:right">
+            <div style="font-size:22px;font-weight:800;color:var(--purple)">${test.percent}%</div>
+            <div class="small muted">${test.correct}/${test.total} дұрыс</div>
+          </div>` : ''}
+          <button class="btn small primary" data-nav-test="${t.id}">Тестті бастау →</button>
+        </div>
+      </div>`;
+    }).join('')}
+  `;
+}
+
+function renderTest(id){
+  const t = TOPICS.find(x=>x.id===id);
+  if(!t){ navigate('tests'); return; }
+  const view = document.getElementById('view');
+  view.innerHTML = `
+    <div class="small muted" style="margin-bottom:8px">
+      <span style="cursor:pointer;color:var(--purple2)" data-nav-btn="tests">Тақырыптық тесттер</span> / ${t.num}
+    </div>
+    <h1>${t.num}. ${t.title} — тест</h1>
+    <p class="muted" style="margin:8px 0 16px">10 сұрақ. Әр сұрақта бір ғана дұрыс жауап. Тест соңында нәтиже мен қателерді талдау көрсетіледі.</p>
+    <div class="card">
+      ${quizHTML(TESTS[t.id], 'test-'+t.id)}
+    </div>
+    <div class="btn-row">
+      <button class="btn" data-nav-btn="tests">← Тесттер тізімі</button>
+      <button class="btn ghost" data-nav-topic="${t.id}">Тақырыпқа өту</button>
+    </div>
+  `;
+}
+
+/* ---------------------------- FINAL TEST -------------------------------- */
+function renderFinal(){
+  const view = document.getElementById('view');
+  const f = progress.final;
+  view.innerHTML = `
+    <h1>🎯 Қорытынды тест</h1>
+    <p class="muted" style="margin-bottom:16px">III бөлім «Деректер базасы» бойынша 30 сұрақ. Барлық тақырып қамтылған. Жауаптар тест соңында ғана тексеріледі.</p>
+
+    ${f ? `<div class="card" style="background:var(--purple-soft);border-color:#ded2f2">
+      <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+        <div>
+          <div class="small muted">Соңғы нәтиже</div>
+          <div style="font-size:32px;font-weight:800;color:var(--purple)">${f.percent}%</div>
+        </div>
+        <div class="small">${f.correct} дұрыс · ${f.total-f.correct} қате · Барлығы ${f.total}</div>
+      </div>
+    </div>` : ''}
+
+    <div class="card">
+      <div class="callout purple">
+        <b>Бағалау шкаласы:</b><br>
+        90–100% — Өте жақсы!<br>
+        75–89% — Жақсы!<br>
+        50–74% — Қайталап оқы.<br>
+        0–49% — Теорияны қайта қарап, тағы тапсыр.
+      </div>
+      ${quizHTML(FINAL_TEST, 'final')}
+    </div>
+  `;
+}
+
+/* ----------------------------- RESULTS ---------------------------------- */
+function renderResults(){
+  const view = document.getElementById('view');
+  let sumPct = 0, testsDone = 0;
+  TOPICS.forEach(t=>{
+    const p = progress.topics[t.id];
+    if(p && p.test){ testsDone++; sumPct += p.test.percent; }
+  });
+  const avg = testsDone ? Math.round(sumPct/testsDone) : 0;
+  const overall = Math.round((testsDone/7*60) + (progress.final ? progress.final.percent*0.25 : 0) + (progress.project && progress.project.state && progress.project.state.score ? progress.project.state.score.total*0.15 : 0));
+
+  view.innerHTML = `
+    <h1>📊 Менің нәтижелерім</h1>
+    <p class="muted" style="margin-bottom:16px">Барлық нәтижелер браузердің <code>localStorage</code> жадында сақталады. Бетті жаңартқанда да жоғалмайды.</p>
+
+    <div class="stats">
+      <div class="stat"><div class="label">Аяқталған тақырып</div><div class="value">${testsDone}/7</div><div class="sub">тест тапсырылды</div></div>
+      <div class="stat"><div class="label">Орташа нәтиже</div><div class="value">${avg}%</div><div class="sub">тақырыптық тесттер</div></div>
+      <div class="stat"><div class="label">Қорытынды тест</div><div class="value">${progress.final ? progress.final.percent+'%' : '—'}</div><div class="sub">${progress.final ? progress.final.correct+'/'+progress.final.total : 'тапсырылмаған'}</div></div>
+      <div class="stat"><div class="label">Мини-жоба</div><div class="value">${progress.project && progress.project.state && progress.project.state.score ? progress.project.state.score.total : '—'}</div><div class="sub">100 балдан</div></div>
+    </div>
+
+    <div class="card">
+      <h2>Жалпы прогресс</h2>
+      <div class="progressbar" style="height:14px"><i style="width:${Math.min(100,overall)}%"></i></div>
+      <div class="small muted" style="margin-top:6px">Жалпы меңгеру деңгейі: <b style="color:var(--purple)">${Math.min(100,overall)}%</b></div>
+    </div>
+
+    <div class="card">
+      <h2>Тақырыптар бойынша нәтиже</h2>
+      <div class="tablewrap"><table class="dtable">
+        <thead><tr><th>№</th><th>Тақырып</th><th>Тапсырмалар</th><th>Тест нәтижесі</th><th>Пайыз</th></tr></thead>
+        <tbody>
+        ${TOPICS.map(t=>{
+          const p = progress.topics[t.id] || {tasks:{}, test:null};
+          const tasksDone = Object.keys(p.tasks||{}).length;
+          return `<tr>
+            <td>${t.num}</td>
+            <td>${t.title}</td>
+            <td>${tasksDone}/2</td>
+            <td>${p.test ? p.test.correct+'/'+p.test.total : '—'}</td>
+            <td>${p.test ? `<b style="color:var(--purple)">${p.test.percent}%</b>` : '<span class="muted">—</span>'}</td>
+          </tr>`;
+        }).join('')}
+        <tr>
+          <td>—</td>
+          <td><b>Қорытынды тест</b></td>
+          <td>—</td>
+          <td>${progress.final ? progress.final.correct+'/'+progress.final.total : '—'}</td>
+          <td>${progress.final ? `<b style="color:var(--purple)">${progress.final.percent}%</b>` : '<span class="muted">—</span>'}</td>
+        </tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <h2>Мини-жоба бағасы</h2>
+      ${progress.project && progress.project.state && progress.project.state.score ? `
+        <div class="score-big">${progress.project.state.score.total} / 100</div>
+        <div class="progressbar"><i style="width:${progress.project.state.score.total}%"></i></div>
+        <div style="margin-top:12px">
+          <div class="crit"><span>Кесте құрылымы</span><span class="v">${progress.project.state.score.structure} / 20</span></div>
+          <div class="crit"><span>Деректердің дұрыстығы</span><span class="v">${progress.project.state.score.data} / 20</span></div>
+          <div class="crit"><span>Іздеу</span><span class="v">${progress.project.state.score.search} / 15</span></div>
+          <div class="crit"><span>Сұрыптау</span><span class="v">${progress.project.state.score.sort} / 15</span></div>
+          <div class="crit"><span>Сүзгілеу</span><span class="v">${progress.project.state.score.filter} / 15</span></div>
+          <div class="crit"><span>Қорытынды және рәсімдеу</span><span class="v">${progress.project.state.score.conclusion} / 15</span></div>
+        </div>
+      ` : '<p class="muted">Мини-жоба әзірге бағаланбаған. <button class="btn small primary" data-nav-btn="project" style="margin-left:8px">Жобаға өту</button></p>'}
+    </div>
+
+    <div class="card">
+      <div class="callout orange">
+        <b>Ескерту:</b> Бұл платформада серверлік авторизация жоқ, сондықтан прогресс тек осы браузерде сақталады. Басқа компьютерде немесе браузерде нәтижелер көрінбейді.
+      </div>
+      <button class="btn ghost" id="resetProgress" style="color:var(--bad);border-color:#f3c9c9">🗑️ Барлық прогресті тазалау</button>
+    </div>
+  `;
+}
+
+/* =========================================================================
+   RENDER
+   ========================================================================= */
+function render(){
+  renderSidebar();
+  updateTopProgress();
+  switch(route.name){
+    case 'home': renderHome(); break;
+    case 'topics': renderTopics(); break;
+    case 'topic': renderTopic(route.param); break;
+    case 'lab': renderLab(); break;
+    case 'practice': renderPractice(); break;
+    case 'project': renderProject(); break;
+    case 'tests': renderTests(); break;
+    case 'test': renderTest(route.param); break;
+    case 'final': renderFinal(); break;
+    case 'results': renderResults(); break;
+    default: renderHome();
+  }
+}
+
+/* =========================================================================
+   EVENTS
+   ========================================================================= */
+document.addEventListener('click', (e)=>{
+  const target = e.target.closest('[data-nav-btn],[data-nav-topic],[data-nav-test],[data-proj-type]');
+  if(target){
+    if(target.dataset.navBtn){ navigate(target.dataset.navBtn); return; }
+    if(target.dataset.navTopic){ navigate('topic', target.dataset.navTopic); return; }
+    if(target.dataset.navTest){ navigate('test', target.dataset.navTest); return; }
+  }
+
+  // SIDEBAR
+  const nav = e.target.closest('.nav-item');
+  if(nav){ navigate(nav.dataset.nav); return; }
+
+  // QUIZ
+  const qBtn = e.target.closest('[data-action]');
+  if(qBtn){
+    const act = qBtn.dataset.action;
+    const qid = qBtn.dataset.quiz;
+    if(act === 'quiz-submit'){ submitQuiz(qid); return; }
+    if(act === 'quiz-reset'){ resetQuiz(qid); return; }
+  }
+
+  // MULTISELECT TASK
+  const msCheck = e.target.closest('[data-ms-check]');
+  if(msCheck){
+    const id = msCheck.dataset.msCheck;
+    const task = findTask(id);
+    const st = MS_STATE[id] || new Set();
+    const correct = task.correct;
+    let ok = st.size === correct.length && correct.every(c=>st.has(c));
+    const fb = document.getElementById('fb-'+id);
+    if(ok){
+      fb.className = 'feedback ok show';
+      fb.innerHTML = '✓ Дұрыс! ' + task.explain;
+      markTaskDone(id);
+    } else {
+      fb.className = 'feedback bad show';
+      const missing = correct.filter(c=>!st.has(c)).length;
+      const extra = [...st].filter(x=>!correct.includes(x)).length;
+      fb.innerHTML = `✗ Толық дұрыс емес. Жетіспейтін дұрыс жауап: ${missing}, артық таңдалған: ${extra}. Қайта көріп, түзетіп көр.<br><span class="muted">${task.explain}</span>`;
+    }
+    return;
+  }
+  const msOpt = e.target.closest('[data-ms-opt]');
+  if(msOpt){
+    setTimeout(()=>{
+      const id = msOpt.dataset.msOpt;
+      const idx = Number(msOpt.dataset.idx);
+      if(!MS_STATE[id]) MS_STATE[id] = new Set();
+      if(MS_STATE[id].has(idx)) MS_STATE[id].delete(idx); else MS_STATE[id].add(idx);
+      msOpt.classList.toggle('on', MS_STATE[id].has(idx));
+    },0);
+    return;
+  }
+
+  // FILLBLANKS
+  const fbCheck = e.target.closest('[data-fb-check]');
+  if(fbCheck){
+    const id = fbCheck.dataset.fbCheck;
+    const task = findTask(id);
+    const st = FB_STATE[id] || {};
+    let ok = true;
+    task.blanks.forEach(b=>{
+      if(st[b.row+'-'+b.key] !== b.answer) ok = false;
+    });
+    const fb = document.getElementById('fb-'+id);
+    if(ok){
+      fb.className = 'feedback ok show';
+      fb.innerHTML = '✓ Керемет! Кесте дұрыс толтырылды. ' + task.explain;
+      markTaskDone(id);
+    } else {
+      fb.className = 'feedback bad show';
+      fb.innerHTML = '✗ Кейбір ұяшықтар қате толтырылған. Әр бағанның типіне назар аудар.<br><span class="muted">' + task.explain + '</span>';
+    }
+    return;
+  }
+
+  // CLICK ERRORS
+  const ceCheck = e.target.closest('[data-ce-check]');
+  if(ceCheck){
+    const id = ceCheck.dataset.ceCheck;
+    const task = findTask(id);
+    const st = CE_STATE[id] || new Set();
+    const correctSet = new Set(task.errors);
+    let ok = st.size === correctSet.size && [...st].every(x=>correctSet.has(x));
+    const fb = document.getElementById('fb-'+id);
+    if(ok){
+      fb.className = 'feedback ok show';
+      fb.innerHTML = '✓ Дұрыс! Барлық қате табылды. ' + task.explain;
+      markTaskDone(id);
+    } else {
+      fb.className = 'feedback bad show';
+      const missed = task.errors.filter(x=>!st.has(x)).length;
+      const wrongPick = [...st].filter(x=>!correctSet.has(x)).length;
+      fb.innerHTML = `✗ Толық дұрыс емес. Табылмаған қате: ${missed}, қате таңдалған ұяшық: ${wrongPick}.<br><span class="muted">${task.explain}</span>`;
+    }
+    return;
+  }
+  const ceCell = e.target.closest('[data-ce]');
+  if(ceCell){
+    const id = ceCell.dataset.ce;
+    const cell = ceCell.dataset.cell;
+    if(!CE_STATE[id]) CE_STATE[id] = new Set();
+    if(CE_STATE[id].has(cell)){ CE_STATE[id].delete(cell); ceCell.classList.remove('selected'); }
+    else { CE_STATE[id].add(cell); ceCell.classList.add('selected'); }
+    return;
+  }
+
+  // TABLE TASK
+  const ttSort = e.target.closest('[data-tt-sort]');
+  if(ttSort){
+    const id = ttSort.dataset.ttSort;
+    const key = ttSort.dataset.key;
+    const task = findTask(id);
+    const st = TT_STATE[id];
+    if(st.sortKey === key) st.sortDir = st.sortDir === 'asc' ? 'desc' : 'asc';
+    else { st.sortKey = key; st.sortDir = 'asc'; }
+    ttRender(task);
+    return;
+  }
+  const ttCheck = e.target.closest('[data-tt-check]');
+  if(ttCheck){
+    const id = ttCheck.dataset.ttCheck;
+    const task = findTask(id);
+    const st = TT_STATE[id];
+    const rows = ttGetRows(task);
+    const fb = document.getElementById('fb-'+id);
+    let ok = false, msg = '';
+
+    if(task.mode === 'find'){
+      if(st._pickedId === undefined || st._pickedId === null){
+        fb.className = 'feedback info show';
+        fb.innerHTML = '⚠ Алдымен кестеден қажетті жолды басып таңда.';
+        return;
+      }
+      ok = Number(st._pickedId) === Number(task.targetId);
+      msg = ok ? '✓ Дұрыс! ' + task.explain : '✗ Басқа жолды таңдадың. Іздеу жолағын пайдаланып, қайта көр.<br><span class="muted">' + task.explain + '</span>';
+    }
+    if(task.mode === 'sort'){
+      const key = task.required.key, dir = task.required.dir;
+      if(!st.sortKey){
+        fb.className = 'feedback info show';
+        fb.innerHTML = '⚠ Алдымен кестені баған атауын басып сұрыпта.';
+        return;
+      }
+      if(st.sortKey !== key){
+        ok = false;
+        msg = '✗ Сұрыптау басқа баған бойынша жасалды. Керек баған: <b>' + task.columns.find(c=>c.key===key).label + '</b>.<br><span class="muted">' + task.explain + '</span>';
+      } else if(st.sortDir !== dir){
+        ok = false;
+        msg = '✗ Бағыт дұрыс емес. Керек бағыт: <b>' + (dir==='desc'?'кему ↓':'өсу ↑') + '</b>.<br><span class="muted">' + task.explain + '</span>';
+      } else {
+        ok = true;
+        msg = '✓ Дұрыс! ' + task.explain;
+      }
+    }
+    if(task.mode === 'filter'){
+      const ids = rows.map(r=>Number(r.id)).sort((a,b)=>a-b);
+      const exp = task.expectedIds.slice().sort((a,b)=>a-b);
+      ok = ids.length === exp.length && ids.every((v,i)=>v===exp[i]);
+      msg = ok ? '✓ Дұрыс! ' + task.explain
+               : `✗ Нәтиже дұрыс емес. Көрсетілген жазба саны: ${rows.length}, керек: ${exp.length}.<br><span class="muted">${task.explain}</span>`;
+    }
+    fb.className = 'feedback ' + (ok ? 'ok show' : 'bad show');
+    fb.innerHTML = msg;
+    if(ok) markTaskDone(id);
+    return;
+  }
+  const ttRow = e.target.closest('[data-tt-row]');
+  if(ttRow){
+    const id = ttRow.dataset.ttRow;
+    const task = findTask(id);
+    TT_STATE[id]._pickedId = ttRow.dataset.rowid;
+    document.querySelectorAll(`[data-tt-body="${id}"] tbody tr`).forEach(tr=>tr.classList.remove('selected'));
+    ttRow.classList.add('selected');
+    return;
+  }
+  const ttClear = e.target.closest('[data-tt-clear]');
+  if(ttClear){
+    const id = ttClear.dataset.ttClear;
+    const task = findTask(id);
+    const st = TT_STATE[id];
+    st.filters = {}; st.ops = {};
+    document.querySelectorAll(`[data-tt-filter="${id}"]`).forEach(s=>s.value='');
+    document.querySelectorAll(`[data-tt-num="${id}"]`).forEach(s=>s.value='');
+    ttRender(task);
+    return;
+  }
+
+  // DATA LAB
+  const labLogic = e.target.closest('[data-lab-logic]');
+  if(labLogic){ LAB.logic = labLogic.dataset.labLogic; renderLab(); return; }
+
+  const condRm = e.target.closest('[data-cond-rm]');
+  if(condRm){
+    LAB.conds.splice(Number(condRm.dataset.condRm),1);
+    renderLab();
+    return;
+  }
+  if(e.target.id === 'labAddCond'){
+    const ds = DATASETS[LAB.ds];
+    LAB.conds.push({key:ds.columns[0].key, op:'=', value:''});
+    renderLab();
+    return;
+  }
+  if(e.target.id === 'labReset'){
+    LAB.search=''; LAB.sortKey=null; LAB.sortDir='asc'; LAB.conds=[]; LAB.logic='AND';
+    renderLab();
+    return;
+  }
+
+  // PROJECT
+  const pType = e.target.closest('[data-proj-type]');
+  if(pType){
+    const t = PROJECT_TYPES.find(x=>x.id===pType.dataset.projType);
+    projectState.typeId = t.id;
+    if(projectState.fields.length === 0) projectState.fields = [...t.fields];
+    if(!projectState.title) projectState.title = t.name;
+    saveProject(); renderProject();
+    return;
+  }
+  const pAdd = e.target.closest('[data-proj-addfield]');
+  if(pAdd){
+    const f = pAdd.dataset.projAddfield;
+    if(!projectState.fields.includes(f)) projectState.fields.push(f);
+    saveProject(); renderProject();
+    return;
+  }
+  const pRm = e.target.closest('[data-proj-rmfield]');
+  if(pRm){
+    const f = pRm.dataset.projRmfield;
+    projectState.fields = projectState.fields.filter(x=>x!==f);
+    projectState.rows.forEach(r=>delete r[f]);
+    saveProject(); renderProject();
+    return;
+  }
+  if(e.target.id === 'projAddCustom'){
+    const v = document.getElementById('projNewField').value.trim();
+    if(v && !projectState.fields.includes(v)){ projectState.fields.push(v); saveProject(); renderProject(); }
+    return;
+  }
+  if(e.target.id === 'projAddRow'){
+    const row = {};
+    projectState.fields.forEach(f=>row[f]='');
+    projectState.rows.push(row);
+    saveProject(); renderProject();
+    return;
+  }
+  const pDel = e.target.closest('[data-proj-delrow]');
+  if(pDel){
+    projectState.rows.splice(Number(pDel.dataset.projDelrow),1);
+    saveProject(); renderProject();
+    return;
+  }
+  if(e.target.id === 'projResetFilters'){
+    projectState._search=''; projectState._sortKey=null; projectState._filterKey=''; projectState._filterVal='';
+    saveProject(); renderProject();
+    return;
+  }
+  if(e.target.id === 'projEvaluate'){
+    projectState.score = projectScore();
+    saveProject(); renderProjResult();
+    const el = document.getElementById('projResult');
+    if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
+    return;
+  }
+
+  // RESULTS RESET
+  if(e.target.id === 'resetProgress'){
+    if(confirm('Барлық прогресс тазаланады. Жалғастырасыз ба?')){
+      progress = {topics:{}, final:null, project:null};
+      saveProgress();
+      projectState = null; initProjectState();
+      render();
+    }
+    return;
+  }
+});
+
+/* input/change делегациясы */
+document.addEventListener('change', (e)=>{
+  // TT filter
+  if(e.target.dataset.ttFilter){
+    const id = e.target.dataset.ttFilter;
+    const key = e.target.dataset.key;
+    const task = findTask(id);
+    TT_STATE[id].filters[key] = e.target.value;
+    ttRender(task);
+    return;
+  }
+  if(e.target.dataset.ttOp){
+    const id = e.target.dataset.ttOp;
+    const key = e.target.dataset.key;
+    TT_STATE[id].ops[key] = e.target.value;
+    return;
+  }
+  if(e.target.dataset.fb){
+    const id = e.target.dataset.fb;
+    if(!FB_STATE[id]) FB_STATE[id] = {};
+    FB_STATE[id][e.target.dataset.row + '-' + e.target.dataset.key] = e.target.value;
+    return;
+  }
+  // LAB
+  if(e.target.id === 'labDs'){ LAB.ds = e.target.value; LAB.conds=[]; LAB.sortKey=null; renderLab(); return; }
+  if(e.target.id === 'labSortKey'){ LAB.sortKey = e.target.value || null; renderLab(); return; }
+  if(e.target.id === 'labSortDir'){ LAB.sortDir = e.target.value; renderLab(); return; }
+  if(e.target.dataset.condKey){ LAB.conds[Number(e.target.dataset.condKey)].key = e.target.value; renderLab(); return; }
+  if(e.target.dataset.condOp){ LAB.conds[Number(e.target.dataset.condOp)].op = e.target.value; renderLab(); return; }
+  // PROJECT
+  if(e.target.id === 'projSortKey'){ projectState._sortKey = e.target.value || null; if(e.target.value) projectState.done.sort = true; saveProject(); renderProject(); return; }
+  if(e.target.id === 'projSortDir'){ projectState._sortDir = e.target.value; saveProject(); renderProject(); return; }
+  if(e.target.id === 'projFilterKey'){ projectState._filterKey = e.target.value; saveProject(); renderProject(); return; }
+  if(e.target.dataset.projCell !== undefined){
+    const ri = Number(e.target.dataset.projCell);
+    const key = e.target.dataset.key;
+    projectState.rows[ri][key] = e.target.value;
+    saveProject();
+    return;
+  }
+});
+
+document.addEventListener('input', (e)=>{
+  if(e.target.dataset.ttSearch){
+    const id = e.target.dataset.ttSearch;
+    const task = findTask(id);
+    TT_STATE[id].search = e.target.value;
+    ttRender(task);
+    return;
+  }
+  if(e.target.dataset.ttNum){
+    const id = e.target.dataset.ttNum;
+    const key = e.target.dataset.key;
+    const task = findTask(id);
+    TT_STATE[id].filters[key] = e.target.value;
+    ttRender(task);
+    return;
+  }
+  if(e.target.id === 'labSearch'){ LAB.search = e.target.value; renderLab(); return; }
+  if(e.target.dataset.condVal !== undefined){
+    const i = Number(e.target.dataset.condVal);
+    LAB.conds[i].value = e.target.value;
+    // рендерсіз тек кестені жаңарту
+    const wrap = document.querySelector('.content .tablewrap');
+    const ds = DATASETS[LAB.ds];
+    const rows = labQuery();
+    if(wrap) wrap.outerHTML = tableHTML(ds.columns, rows, {sortable:true, sortKey:LAB.sortKey, sortDir:LAB.sortDir, tableId:'lab'});
+    const meta = document.querySelector('.lab-meta');
+    if(meta) meta.querySelector('span b').textContent = rows.length;
+    return;
+  }
+  if(e.target.id === 'projTitle'){ projectState.title = e.target.value; saveProject(); return; }
+  if(e.target.id === 'projSearch'){ projectState._search = e.target.value; if(e.target.value.trim()) projectState.done.search = true; saveProject(); renderProjTable(); updateProjMeta(); return; }
+  if(e.target.id === 'projFilterVal'){ projectState._filterVal = e.target.value; if(e.target.value.trim()) projectState.done.filter = true; saveProject(); renderProjTable(); updateProjMeta(); return; }
+  if(e.target.id === 'projConclusion'){ projectState.conclusion = e.target.value; saveProject(); return; }
+});
+
+function updateProjMeta(){
+  const meta = document.querySelector('.lab-meta');
+  if(!meta) return;
+  const s = projectState;
+  meta.innerHTML = `
+    <span>Көрсетілген жазба: <b>${s._viewRows ? s._viewRows.length : s.rows.length}</b> / ${s.rows.length}</span>
+    <span>Іздеу: <b>${s.done.search?'✓ орындалды':'—'}</b></span>
+    <span>Сұрыптау: <b>${s.done.sort?'✓ орындалды':'—'}</b></span>
+    <span>Сүзгілеу: <b>${s.done.filter?'✓ орындалды':'—'}</b></span>`;
+}
+
+function findTask(id){
+  for(const t of TOPICS){
+    const task = t.tasks.find(x=>x.id===id);
+    if(task) return task;
+  }
+  return null;
+}
+
+function markTaskDone(taskId){
+  for(const t of TOPICS){
+    if(t.tasks.some(x=>x.id===taskId)){
+      const p = topicProg(t.id);
+      p.tasks[taskId] = true;
+      saveProgress();
+      // тапсырма тақырыбының жанындағы белгіні жаңарту
+      const head = document.querySelector(`[data-task-id="${taskId}"] .task-title`);
+      if(head && !head.querySelector('.badge')){
+        head.insertAdjacentHTML('beforeend','<span class="badge" style="background:var(--ok);color:#fff;border-radius:20px;padding:2px 9px;font-size:11px;margin-left:8px">✓ орындалды</span>');
+      }
+      break;
+    }
+  }
+}
+
+/* ------------------------ SIDEBAR / SEARCH ------------------------------ */
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+function closeSidebar(){ sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+document.getElementById('hamburger').addEventListener('click', ()=>{
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('show');
+});
+overlay.addEventListener('click', closeSidebar);
+
+const gSearch = document.getElementById('globalSearch');
+const sResults = document.getElementById('searchResults');
+gSearch.addEventListener('input', ()=>{
+  const q = gSearch.value.trim().toLowerCase();
+  if(q.length < 2){ sResults.style.display = 'none'; return; }
+  const items = [];
+  TOPICS.forEach(t=>{
+    if(t.title.toLowerCase().includes(q) || t.num.includes(q) || t.short.toLowerCase().includes(q)){
+      items.push({label:`📘 ${t.num}. ${t.title}`, route:'topic', param:t.id});
+    }
+    t.tasks.forEach(task=>{
+      if(task.title.toLowerCase().includes(q)) items.push({label:`🧩 ${task.title} (${t.num})`, route:'topic', param:t.id});
+    });
+  });
+  Object.keys(DATASETS).forEach(k=>{
+    if(DATASETS[k].title.toLowerCase().includes(q)) items.push({label:`🧪 ${DATASETS[k].title}`, route:'lab', param:null});
+  });
+  if('data lab зертхана'.includes(q)) items.push({label:'🧪 Data Lab', route:'lab', param:null});
+  if('мини-жоба жоба project'.includes(q)) items.push({label:'🛠️ Мини-жоба', route:'project', param:null});
+  if('қорытынды тест final'.includes(q)) items.push({label:'🎯 Қорытынды тест', route:'final', param:null});
+  if('нәтиже results'.includes(q)) items.push({label:'📊 Менің нәтижелерім', route:'results', param:null});
+
+  if(items.length === 0){ sResults.style.display='none'; return; }
+  sResults.innerHTML = items.slice(0,8).map((it,i)=>`<div data-si="${i}">${it.label}</div>`).join('');
+  sResults.style.display = 'block';
+  sResults.querySelectorAll('[data-si]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const it = items[Number(el.dataset.si)];
+      sResults.style.display = 'none';
+      gSearch.value = '';
+      navigate(it.route, it.param);
+    });
+  });
+});
+document.addEventListener('click', (e)=>{
+  if(!e.target.closest('#searchResults') && !e.target.closest('.searchbar')) sResults.style.display = 'none';
+});
+
+/* =========================================================================
+   INIT
+   ========================================================================= */
+registerQuizzes();
+initProjectState();
+render();
+</script>
+</body>
+</html>
